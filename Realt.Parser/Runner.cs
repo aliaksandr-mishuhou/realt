@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Realt.Parser
@@ -14,9 +15,24 @@ namespace Realt.Parser
             _repository = repository;
         }
 
-        public Task RunAsync()
+        public async Task RunAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                // load general info (total & token)
+                var info = await _parser.GetInfoAsync();
+                Console.WriteLine($"Total: {info.Total}, Pages: {info.TotalPages}, Token: {info.Token}");
+
+                for (var i = 0; i < info.TotalPages; i++)
+                {
+                    var items = await _parser.ReadPageAsync(info.Token, i);
+                    Console.WriteLine($"Page {i}: {items.Count()}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
 
         //public Task ResumeAsync()
