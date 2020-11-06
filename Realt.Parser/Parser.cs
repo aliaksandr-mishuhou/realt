@@ -67,7 +67,7 @@ namespace Realt.Parser
 
             foreach (var param in formParams)
             {
-                var paramContent = new FormUrlEncodedContent(new[] { param });
+                var paramContent = new StringContent(param.Value);
                 formContent.Add(paramContent, param.Key);
             }
 
