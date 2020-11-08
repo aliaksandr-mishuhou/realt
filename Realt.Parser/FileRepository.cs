@@ -9,7 +9,7 @@ namespace Realt.Parser
 {
     public class FileRepository : IRepository
     {
-        private const string FilenameTemplate = "./data/db-{0}-{1}.json";
+        private const string FilenameTemplate = "./db-{0}-{1}.json";
 
         public async Task<bool> AddRangeAsync(IEnumerable<Property> items, string operationId)
         {
