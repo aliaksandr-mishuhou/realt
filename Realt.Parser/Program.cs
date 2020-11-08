@@ -6,7 +6,7 @@ namespace Realt.Parser
     {
         static void Main(string[] args)
         {
-            IRunner runner = new Runner(new Parser(), new Repository());
+            IRunner runner = new Runner(new Parser(), new FileRepository());
             runner.RunAsync().Wait();
         }
     }

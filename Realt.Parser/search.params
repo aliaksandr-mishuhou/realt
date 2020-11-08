@@ -1,5 +1,5 @@
-tx_uedbflat_pi2[DATA][rooms][e][1]:
-tx_uedbflat_pi2[DATA][rooms][e][2]:
+tx_uedbflat_pi2[DATA][rooms][e][1]:3
+tx_uedbflat_pi2[DATA][rooms][e][2]:3
 tx_uedbflat_pi2[DATA][price_m2][ge]:
 tx_uedbflat_pi2[DATA][price_m2][le]:
 tx_uedbflat_pi2[DATA][price][ge]:
@@ -11,8 +11,8 @@ tx_uedbflat_pi2[DATA][town_id][e]:5102
 tx_uedbflat_pi2[DATA][town_name][like][0]:
 tx_uedbflat_pi2[DATA][street_name][like][0]:
 tx_uedbflat_pi2[DATA][house_number][range][0]:
-tx_uedbflat_pi2[DATA][building_year][ge]:
-tx_uedbflat_pi2[DATA][building_year][le]:
+tx_uedbflat_pi2[DATA][building_year][ge]:2010
+tx_uedbflat_pi2[DATA][building_year][le]:2020
 tx_uedbflat_pi2[DATA][repair_year][ge]:
 tx_uedbflat_pi2[DATA][repair_year][le]:
 tx_uedbflat_pi2[DATA][area_total][ge]:

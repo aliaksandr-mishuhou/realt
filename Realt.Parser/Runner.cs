@@ -26,6 +26,7 @@ namespace Realt.Parser
                 for (var i = 0; i < info.TotalPages; i++)
                 {
                     var items = await _parser.ReadPageAsync(info.Token, i);
+                    await _repository.AddRangeAsync(items, i.ToString());
                     Console.WriteLine($"Page {i}: {items.Count()}");
                 }
             }
