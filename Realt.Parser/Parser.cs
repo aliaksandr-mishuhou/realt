@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using AngleSharp.Html.Parser;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Realt.Parser.Model;
@@ -34,6 +35,12 @@ namespace Realt.Parser
             });
 
         private readonly HtmlParser _parser = new HtmlParser();
+        private readonly ILogger<Parser> _logger;
+
+        public Parser(ILogger<Parser> logger)
+        {
+            _logger = logger;
+        }
 
 
         public async Task<Info> GetInfoAsync()
@@ -137,7 +144,7 @@ namespace Realt.Parser
             var result = new List<Property>();
             var url = string.Format(SearchUrlTemplate, HttpUtility.UrlEncode(token), page);
 
-            Console.WriteLine(url);
+            _logger.LogInformation($"Loading {url}");
 
             var resultHtml = await _client.GetStringAsync(url);
             var document = await _parser.ParseDocumentAsync(resultHtml);
@@ -151,7 +158,7 @@ namespace Realt.Parser
             return result;
         }
 
-        private static Property BuildProperty(AngleSharp.Dom.IElement element)
+        private Property BuildProperty(AngleSharp.Dom.IElement element)
         {
             var property = new Property();
             try
@@ -215,12 +222,12 @@ namespace Realt.Parser
                 property.PriceByn = GetPrice(element, CurrencyByn);
                 property.PriceUsd = GetPrice(element, CurrencyUsd);
 
-                Console.WriteLine($"Result: {property}");
+                _logger.LogInformation("Completed [{0}]", property);
             }
             catch (Exception ex)
             {
                 property.Error = ex.ToString();
-                Console.WriteLine(ex);
+                _logger.LogError("Could not transform [{0}]", property, ex);
             }
 
             return property;

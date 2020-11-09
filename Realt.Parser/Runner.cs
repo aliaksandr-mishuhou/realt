@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Realt.Parser
 {
@@ -8,11 +9,13 @@ namespace Realt.Parser
     {
         private readonly IParser _parser;
         private readonly IRepository _repository;
+        private readonly ILogger<Runner> _logger;
 
-        public Runner(IParser parser, IRepository repository)
+        public Runner(IParser parser, IRepository repository, ILogger<Runner> logger)
         {
             _parser = parser;
             _repository = repository;
+            _logger = logger;
         }
 
         public async Task RunAsync()
@@ -27,12 +30,12 @@ namespace Realt.Parser
                 {
                     var items = await _parser.ReadPageAsync(info.Token, i);
                     await _repository.AddRangeAsync(items, i.ToString());
-                    Console.WriteLine($"Page {i}: {items.Count()}");
+                    _logger.LogInformation($"Page {i}: {items.Count()}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                _logger.LogError("Fatal error", ex);
             }
         }
 
