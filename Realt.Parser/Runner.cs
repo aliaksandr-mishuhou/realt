@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -22,16 +23,23 @@ namespace Realt.Parser
         {
             try
             {
+                var sw = new Stopwatch();
+                sw.Start();
+                _logger.LogInformation("Starting...");
                 // load general info (total & token)
                 var info = await _parser.GetInfoAsync();
-                Console.WriteLine($"Total: {info.Total}, Pages: {info.TotalPages}, Token: {info.Token}");
+                _logger.LogInformation($"Total: {info.Total}, Pages: {info.TotalPages}, Token: {info.Token}");
 
                 for (var i = 0; i < info.TotalPages; i++)
                 {
                     var items = await _parser.ReadPageAsync(info.Token, i);
-                    await _repository.AddRangeAsync(items, i.ToString());
+                    await _repository.AddRangeAsync(items, i);
                     _logger.LogInformation($"Page {i}: {items.Count()}");
                 }
+
+                sw.Stop();
+                _logger.LogInformation($"Completed. Elapsed: {sw.Elapsed}");
+
             }
             catch (Exception ex)
             {

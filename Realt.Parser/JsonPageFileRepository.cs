@@ -12,7 +12,7 @@ namespace Realt.Parser
         private const string DirectoryTemplate = "./data/{0}/json";
         private const string FilenameTemplate = "{0}_{1}.json";
 
-        public async Task<bool> AddRangeAsync(IEnumerable<Property> items, string operationId)
+        public async Task<bool> AddRangeAsync(IEnumerable<Property> items, int operationId)
         {
             var dateStr = DateTime.UtcNow.ToString("yyyy-MM-dd");
             var filename = string.Format(FilenameTemplate, dateStr, operationId);

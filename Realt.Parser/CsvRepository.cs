@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Realt.Parser.Model;
 
 namespace Realt.Parser
@@ -14,7 +14,13 @@ namespace Realt.Parser
         private const string FilenameTemplate = "{0}.csv";
         private const string CsvSeparator = ",";
 
-        public async Task<bool> AddRangeAsync(IEnumerable<Property> items, string operationId)
+        private readonly IEnumerable<string> _columns = TypeDescriptor
+            .GetProperties(typeof(Property))
+            .OfType<PropertyDescriptor>()
+            .ToList()
+            .Select(x => x.Name);
+
+        public async Task<bool> AddRangeAsync(IEnumerable<Property> items, int operationId)
         {
             var dateStr = DateTime.UtcNow.ToString("yyyy-MM-dd");
             var filename = string.Format(FilenameTemplate, dateStr);
@@ -25,18 +31,39 @@ namespace Realt.Parser
                 Directory.CreateDirectory(directory);
             }
 
-            var lines = items.Select(i => ToCsvLine(i));
+            if (operationId == 0 && File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
+            if (!File.Exists(path))
+            {
+                var header = string.Join(CsvSeparator, _columns);
+                await File.AppendAllLinesAsync(path, new[] { header });
+            }
+
+            var lines = items.Select(row => BuildCsvRow(row));
             await File.AppendAllLinesAsync(path, lines);
 
             return true;
         }
 
-        private static string ToCsvLine(Property property)
+        private string BuildCsvRow(Property property)
         {
-            var properties = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(property));
-            return string.Join(CsvSeparator, properties.Values);
+            return string.Join(CsvSeparator,
+                _columns.Select(a => EscapeCsvValue(typeof(Property)
+                .GetProperty(a).GetValue(property, null))));
         }
 
+        private static object EscapeCsvValue(object s)
+        {
+            if (s != null && s.ToString().Contains(CsvSeparator))
+            {
+                return $"\"{s}\"";
+            }
+
+            return s;
+        }
     }
 
 }

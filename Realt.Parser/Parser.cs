@@ -148,7 +148,7 @@ namespace Realt.Parser
 
             var resultHtml = await _client.GetStringAsync(url);
             var document = await _parser.ParseDocumentAsync(resultHtml);
-            var elements = document.QuerySelectorAll(".bd-table-item-header");
+            var elements = document.QuerySelectorAll(".bd-table-item");
             foreach (var element in elements)
             {
                 Property property = BuildProperty(element);
@@ -163,23 +163,24 @@ namespace Realt.Parser
             var property = new Property();
             try
             {
+                var headerElement = element.QuerySelector(".bd-table-item-header");
                 // rooms
-                var rooms = element.QuerySelector("div.kv span").InnerHtml.Trim().Split("/");
+                var rooms = headerElement.QuerySelector("div.kv span").InnerHtml.Trim().Split("/");
                 if (rooms.Length == 2)
                 {
-                    property.RoomLiving = Convert.ToInt32(rooms[0]);
-                    property.RoomTotal = Convert.ToInt32(rooms[1]);
+                    property.RoomTotal = Convert.ToInt32(rooms[0]); // TODO: parse error
+                    property.RoomLiving = Convert.ToInt32(rooms[1]); // TODO: parse error
                 }
 
                 // district/address
-                var district = element.QuerySelector("div.ra span").InnerHtml.Trim();
+                var district = headerElement.QuerySelector("div.ra span").InnerHtml.Trim();
                 property.District = district;
 
-                var address = element.QuerySelector("div.ad a").InnerHtml.Trim();
+                var address = headerElement.QuerySelector("div.ad a").InnerHtml.Trim();
                 property.Address = address;
 
                 // ID/details URL
-                var url = element.QuerySelector("div.ad a").GetAttribute("href");
+                var url = headerElement.QuerySelector("div.ad a").GetAttribute("href");
                 var m = Regex.Match(url, @"\/(\d+)\/");
                 if (m.Success)
                 {
@@ -188,7 +189,7 @@ namespace Realt.Parser
                 }
 
                 // floor
-                var floor = element.QuerySelector("div.ee span").InnerHtml.Trim();
+                var floor = headerElement.QuerySelector("div.ee span").InnerHtml.Trim();
                 m = Regex.Match(floor, @"(\d+)\/(\d+)");
                 if (m.Success)
                 {
@@ -197,7 +198,7 @@ namespace Realt.Parser
                 }
 
                 // square & year
-                var pls = element.QuerySelectorAll("div.pl span");
+                var pls = headerElement.QuerySelectorAll("div.pl span");
                 if (pls.Length >= 3)
                 {
                     // square
@@ -219,8 +220,15 @@ namespace Realt.Parser
                 }
 
                 // price
-                property.PriceByn = GetPrice(element, CurrencyByn);
-                property.PriceUsd = GetPrice(element, CurrencyUsd);
+                property.PriceByn = GetPrice(headerElement, CurrencyByn); // TODO: null reference
+                property.PriceUsd = GetPrice(headerElement, CurrencyUsd);
+
+                // date
+                var date = element.QuerySelector(".bd-table-item-wrapper .date span").InnerHtml.Trim().Split(".");
+                property.Created = new DateTime(
+                    Convert.ToInt32(date[2]),
+                    Convert.ToInt32(date[1]),
+                    Convert.ToInt32(date[0]));
 
                 _logger.LogInformation("Completed [{0}]", property);
             }
@@ -235,7 +243,7 @@ namespace Realt.Parser
 
         private static int GetPrice(AngleSharp.Dom.IElement element, int currency)
         {
-            var valueRaw = HttpUtility.HtmlDecode(element.QuerySelector("span.price-switchable").GetAttribute($"data-{currency}"))
+            var valueRaw = HttpUtility.HtmlDecode(element.QuerySelector("span.price-switchable").GetAttribute($"data-{currency}")) // TODO: null reference
                 .Trim()
                 .Replace("\t", string.Empty);
             valueRaw = Regex.Replace(valueRaw, @"[\D]", string.Empty);

@@ -6,6 +6,6 @@ namespace Realt.Parser
 {
     public interface IRepository
     {
-        Task<bool> AddRangeAsync(IEnumerable<Property> items, string operationId);
+        Task<bool> AddRangeAsync(IEnumerable<Property> items, int operationId);
     }
 }

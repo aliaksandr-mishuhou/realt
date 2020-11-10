@@ -17,7 +17,7 @@ namespace Realt.Parser
             _logger = logger;
         }
 
-        public async Task<bool> AddRangeAsync(IEnumerable<Property> items, string operationId)
+        public async Task<bool> AddRangeAsync(IEnumerable<Property> items, int operationId)
         {
             var result = true;
             foreach (var repository in _repositories)
