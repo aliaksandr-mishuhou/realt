@@ -57,9 +57,17 @@ namespace Realt.Parser
 
         private static object EscapeCsvValue(object s)
         {
-            if (s != null && s.ToString().Contains(CsvSeparator))
+            if (s != null)
             {
-                return $"\"{s}\"";
+                if (s is DateTime)
+                {
+                    return ((DateTime)s).ToString("yyyy-MM-dd");
+                }
+
+                if (s.ToString().Contains(CsvSeparator))
+                {
+                    return $"\"{s}\"";
+                }
             }
 
             return s;

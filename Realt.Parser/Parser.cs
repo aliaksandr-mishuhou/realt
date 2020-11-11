@@ -28,6 +28,8 @@ namespace Realt.Parser
         private const string HashParam = "hash";
         private const int CurrencyByn = 933;
         private const int CurrencyUsd = 840;
+        private const string RoomShared = "к";
+
         private readonly HttpClient _client = new HttpClient(
             new HttpClientHandler()
             {
@@ -163,72 +165,21 @@ namespace Realt.Parser
             var property = new Property();
             try
             {
-                var headerElement = element.QuerySelector(".bd-table-item-header");
-                // rooms
-                var rooms = headerElement.QuerySelector("div.kv span").InnerHtml.Trim().Split("/");
-                if (rooms.Length == 2)
-                {
-                    property.RoomTotal = Convert.ToInt32(rooms[0]); // TODO: parse error
-                    property.RoomLiving = Convert.ToInt32(rooms[1]); // TODO: parse error
-                }
+                // .bd-table-item-header
+                ParseId(element, property);
 
-                // district/address
-                var district = headerElement.QuerySelector("div.ra span").InnerHtml.Trim();
-                property.District = district;
+                ParseRooms(element, property);
 
-                var address = headerElement.QuerySelector("div.ad a").InnerHtml.Trim();
-                property.Address = address;
+                ParseAddress(element, property);
 
-                // ID/details URL
-                var url = headerElement.QuerySelector("div.ad a").GetAttribute("href");
-                var m = Regex.Match(url, @"\/(\d+)\/");
-                if (m.Success)
-                {
-                    var id = Convert.ToInt64(m.Groups[1].Value);
-                    property.Id = id;
-                }
+                ParseFloor(element, property);
 
-                // floor
-                var floor = headerElement.QuerySelector("div.ee span").InnerHtml.Trim();
-                m = Regex.Match(floor, @"(\d+)\/(\d+)");
-                if (m.Success)
-                {
-                    property.Floor = Convert.ToInt32(m.Groups[1].Value);
-                    property.FloorTotal = Convert.ToInt32(m.Groups[2].Value);
-                }
+                ParseYearSquareBalcony(element, property);
 
-                // square & year
-                var pls = headerElement.QuerySelectorAll("div.pl span");
-                if (pls.Length >= 3)
-                {
-                    // square
-                    var square = pls[0].InnerHtml.Trim().Split("/");
-                    if (square.Length == 3)
-                    {
-                        property.SquareTotal = ConvertSquare(square[0]).GetValueOrDefault();
-                        property.SquareLiving = ConvertSquare(square[1]);
-                        property.SquareKitchen = ConvertSquare(square[2]);
-                    }
+                ParsePrices(element, property);
 
-                    // year
-                    var year = pls[1].InnerHtml.Trim();
-                    m = Regex.Match(year, @"\d{4}");
-                    if (m.Success)
-                    {
-                        property.Year = Convert.ToInt32(m.Groups[0].Value);
-                    }
-                }
-
-                // price
-                property.PriceByn = GetPrice(headerElement, CurrencyByn); // TODO: null reference
-                property.PriceUsd = GetPrice(headerElement, CurrencyUsd);
-
-                // date
-                var date = element.QuerySelector(".bd-table-item-wrapper .date span").InnerHtml.Trim().Split(".");
-                property.Created = new DateTime(
-                    Convert.ToInt32(date[2]),
-                    Convert.ToInt32(date[1]),
-                    Convert.ToInt32(date[0]));
+                // .bd-table-item-wrapper
+                ParseDate(element, property);
 
                 _logger.LogInformation("Completed [{0}]", property);
             }
@@ -241,12 +192,142 @@ namespace Realt.Parser
             return property;
         }
 
-        private static int GetPrice(AngleSharp.Dom.IElement element, int currency)
+        private static void ParseId(AngleSharp.Dom.IElement element, Property property)
         {
-            var valueRaw = HttpUtility.HtmlDecode(element.QuerySelector("span.price-switchable").GetAttribute($"data-{currency}")) // TODO: null reference
-                .Trim()
-                .Replace("\t", string.Empty);
+            var url = element.QuerySelector(".bd-table-item-header div.ad a").GetAttribute("href");
+            property.Url = url;
+
+            var m = Regex.Match(url, @"\/(\d+)\/");
+            if (m.Success)
+            {
+                var id = Convert.ToInt64(m.Groups[1].Value);
+                property.Id = id;
+            }
+        }
+
+        private static void ParseRooms(AngleSharp.Dom.IElement element, Property property)
+        {
+            var rooms = element.QuerySelector(".bd-table-item-header div.kv span").InnerHtml.Trim().Split("/");
+            if (rooms.Length == 2)
+            {
+                if (rooms[0] == RoomShared)
+                {
+                    property.Shared = true;
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(rooms[0]))
+                    {
+                        property.RoomTotal = Convert.ToInt32(rooms[0]);
+                    }
+
+                    if (!string.IsNullOrEmpty(rooms[1]))
+                    {
+                        property.RoomSeparate = Convert.ToInt32(rooms[1]);
+                    }
+                }
+            }
+        }
+
+        private static void ParseAddress(AngleSharp.Dom.IElement element, Property property)
+        {
+            var district = element.QuerySelector(".bd-table-item-header div.ra span").InnerHtml.Trim();
+            property.District = district;
+
+            var address = element.QuerySelector(".bd-table-item-header div.ad a").InnerHtml.Trim();
+            property.Address = address;
+        }
+
+        private static void ParseYearSquareBalcony(AngleSharp.Dom.IElement element, Property property)
+        {
+            var pls = element.QuerySelectorAll(".bd-table-item-header div.pl span");
+            if (pls.Length >= 3)
+            {
+                // square
+                var square = pls[0].InnerHtml.Trim().Split("/");
+                if (square.Length == 3)
+                {
+                    property.SquareTotal = ConvertSquare(square[0]).GetValueOrDefault();
+                    property.SquareLiving = ConvertSquare(square[1]);
+                    property.SquareKitchen = ConvertSquare(square[2]);
+                }
+
+                // year
+                var year = pls[1].InnerHtml.Trim();
+                var m = Regex.Match(year, @"\d{4}");
+                if (m.Success)
+                {
+                    property.Year = Convert.ToInt32(m.Groups[0].Value);
+                }
+
+                // balcony
+                property.Balcony = pls[2].InnerHtml.Trim();
+            }
+        }
+
+        private static void ParseFloor(AngleSharp.Dom.IElement element, Property property)
+        {
+            var floor = element.QuerySelector(".bd-table-item-header div.ee span").InnerHtml.Trim();
+            var m = Regex.Match(floor, @"(\d+)\w*\/(\d*) (\w*)");
+            if (m.Success)
+            {
+                property.Floor = ConvertFloor(m.Groups[1].Value);
+                if (m.Groups.Count > 2)
+                {
+                    property.FloorTotal = ConvertFloor(m.Groups[2].Value);
+                }
+
+                if (m.Groups.Count > 3)
+                {
+                    property.Type = m.Groups[3].Value;
+                }
+            }
+        }
+
+        private static int? ConvertFloor(string s)
+        {
+            try
+            {
+                return Convert.ToInt32(s);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static void ParseDate(AngleSharp.Dom.IElement element, Property property)
+        {
+            var date = element.QuerySelector(".bd-table-item-wrapper .date span").InnerHtml.Trim().Split(".");
+            property.Created = new DateTime(
+                Convert.ToInt32(date[2]),
+                Convert.ToInt32(date[1]),
+                Convert.ToInt32(date[0]));
+        }
+
+        private void ParsePrices(AngleSharp.Dom.IElement element, Property property)
+        {
+            property.PriceByn = GetPrice(element, CurrencyByn);
+            property.PriceUsd = GetPrice(element, CurrencyUsd);
+        }
+
+        private int? GetPrice(AngleSharp.Dom.IElement element, int currency)
+        {
+            var priceElement = element.QuerySelector("span.price-switchable");
+            if (priceElement == null)
+            {
+                return null;
+            }
+
+            var valueRaw = priceElement.GetAttribute($"data-{currency}");
+            if (string.IsNullOrEmpty(valueRaw))
+            {
+                return null;
+            }
+
+            valueRaw = HttpUtility.HtmlDecode(valueRaw).Trim().Replace("\t", string.Empty);
             valueRaw = Regex.Replace(valueRaw, @"[\D]", string.Empty);
+
             return Convert.ToInt32(valueRaw);
         }
 
@@ -255,6 +336,18 @@ namespace Realt.Parser
             try
             {
                 return Convert.ToDouble(square.Replace(",", "."));
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static int? ConvertRoom(string price)
+        {
+            try
+            {
+                return Convert.ToInt32(price);
             }
             catch
             {
