@@ -181,7 +181,7 @@ namespace Realt.Parser
                 // .bd-table-item-wrapper
                 ParseDate(element, property);
 
-                _logger.LogInformation("Completed [{0}]", property);
+                _logger.LogDebug("Completed [{0}]", property);
             }
             catch (Exception ex)
             {

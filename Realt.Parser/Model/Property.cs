@@ -1,4 +1,5 @@
 ﻿using System;
+using Dapper.Contrib.Extensions;
 using Newtonsoft.Json;
 
 namespace Realt.Parser.Model
@@ -6,10 +7,12 @@ namespace Realt.Parser.Model
     public class Property
     {
         public long Id { get; set; }
+        [Computed]
         public string Url { get; set; }
 
         public int? RoomTotal { get; set; }
         public int? RoomSeparate { get; set; }
+        [Computed]
         public bool Shared { get; set; }
         public int? Year { get; set; }
         public double SquareTotal { get; set; }

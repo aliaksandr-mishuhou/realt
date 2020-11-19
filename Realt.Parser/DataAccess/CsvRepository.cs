@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Realt.Parser.Model;
 
-namespace Realt.Parser
+namespace Realt.Parser.DataAccess
 {
     public class CsvRepository : IRepository
     {
@@ -20,21 +20,21 @@ namespace Realt.Parser
             .ToList()
             .Select(x => x.Name);
 
-        public async Task<bool> AddRangeAsync(IEnumerable<Property> items, int operationId)
+        public Task ClearAsync(string scanId)
         {
-            var dateStr = DateTime.UtcNow.ToString("yyyy-MM-dd");
-            var filename = string.Format(FilenameTemplate, dateStr);
-            var directory = string.Format(DirectoryTemplate, dateStr);
-            var path = $"{directory}/{filename}";
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            if (operationId == 0 && File.Exists(path))
+            var path = GetPath();
+            if (File.Exists(path))
             {
                 File.Delete(path);
             }
+
+            return Task.FromResult(0);
+        }
+
+        public async Task<bool> AddRangeAsync(IEnumerable<Property> items, string scanId, DateTime scanned)
+        // public async Task<bool> AddRangeAsync(IEnumerable<PropertyHistory> items)
+        {
+            var path = GetPath();
 
             if (!File.Exists(path))
             {
@@ -46,6 +46,20 @@ namespace Realt.Parser
             await File.AppendAllLinesAsync(path, lines);
 
             return true;
+        }
+
+        private static string GetPath()
+        {
+            var dateStr = DateTime.UtcNow.ToString("yyyy-MM-dd");
+            var filename = string.Format(FilenameTemplate, dateStr);
+            var directory = string.Format(DirectoryTemplate, dateStr);
+            var path = $"{directory}/{filename}";
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            return path;
         }
 
         private string BuildCsvRow(Property property)
@@ -73,5 +87,4 @@ namespace Realt.Parser
             return s;
         }
     }
-
 }

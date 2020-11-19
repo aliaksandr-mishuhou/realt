@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Realt.Parser.DataAccess;
 
 namespace Realt.Parser
 {
@@ -30,10 +31,15 @@ namespace Realt.Parser
                 var info = await _parser.GetInfoAsync();
                 _logger.LogInformation($"Total: {info.Total}, Pages: {info.TotalPages}, Token: {info.Token}");
 
-                for (var i = 0; i < info.TotalPages; i++)
+                var scanId = DateTime.UtcNow.ToString("yyyy-MM-dd");
+                await _repository.ClearAsync(scanId);
+
+                for (var i = 0; i <= info.TotalPages; i++)
                 {
                     var items = await _parser.ReadPageAsync(info.Token, i);
-                    await _repository.AddRangeAsync(items, i);
+                    var scanned = DateTime.UtcNow;
+
+                    await _repository.AddRangeAsync(items, scanId, scanned);
                     _logger.LogInformation($"Page {i}: {items.Count()}");
                 }
 
