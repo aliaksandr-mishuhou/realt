@@ -32,7 +32,6 @@ namespace Realt.Parser.DataAccess
         }
 
         public async Task<bool> AddRangeAsync(IEnumerable<Property> items, string scanId, DateTime scanned)
-        // public async Task<bool> AddRangeAsync(IEnumerable<PropertyHistory> items)
         {
             var path = GetPath();
 

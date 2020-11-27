@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Npgsql;
 using Realt.Parser.Model;
-using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using Dapper;
 
 namespace Realt.Parser.DataAccess
 {
@@ -13,6 +13,13 @@ namespace Realt.Parser.DataAccess
     {
         private readonly string _connectionString;
         private readonly ILogger<PgSqlRepository> _logger;
+
+        private const int RetryCount = 3;
+
+        private const string InsertSql = @"
+INSERT INTO history(
+	    id, scan_id, scanned, room_total, room_separate, year, square_total, square_living, square_kitchen, floor, floor_total, price_usd, price_byn, type, balcony, district, address, created, error)
+VALUES (@Id, @ScanId, @Scanned, @RoomTotal, @RoomSeparate, @Year, @SquareTotal, @SquareLiving, @SquareKitchen, @Floor, @FloorTotal, @PriceUsd, @PriceByn, @Type, @Balcony, @District, @Address, @Created, @Error);";
 
         public PgSqlRepository(string connectionString, ILogger<PgSqlRepository> logger)
         {
@@ -24,20 +31,23 @@ namespace Realt.Parser.DataAccess
         {
             try
             {
+                
                 var result = true;
                 using (var conn = new NpgsqlConnection(_connectionString))
                 {
                     await conn.OpenAsync();
-                    var historyItems = items.Select(item => HistoryProperty.Create(item, scanId, scanned));
-                    foreach (var historyItem in historyItems)
+                    var historyItems = items.Select(item => History.Create(item, scanId, scanned));
+
+                    for (var i = 0; i < RetryCount; i++)
                     {
                         try
                         {
-                            await conn.InsertAsync(historyItem);
+                            await conn.ExecuteAsync(InsertSql, historyItems);
+                            break;
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError($"Could not save entity {historyItem.Id} to DB for {scanId}", ex);
+                            _logger.LogError($"Could not save entities DB for {scanId}, attempt {i}", ex);
                             result = false;
                         }
                     }
@@ -59,7 +69,7 @@ namespace Realt.Parser.DataAccess
                 using (var conn = new NpgsqlConnection(_connectionString))
                 {
                     await conn.OpenAsync();
-                    // TODO: cleanup
+                    await conn.ExecuteAsync("DELETE FROM history WHERE scan_id = @ScanId", new { ScanId = scanId });
                 }
             }
             catch (Exception ex)

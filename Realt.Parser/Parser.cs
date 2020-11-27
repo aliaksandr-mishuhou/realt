@@ -195,7 +195,6 @@ namespace Realt.Parser
         private static void ParseId(AngleSharp.Dom.IElement element, Property property)
         {
             var url = element.QuerySelector(".bd-table-item-header div.ad a").GetAttribute("href");
-            property.Url = url;
 
             var m = Regex.Match(url, @"\/(\d+)\/");
             if (m.Success)
