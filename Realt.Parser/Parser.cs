@@ -26,9 +26,6 @@ namespace Realt.Parser
         private const string PageParam = "tx_uedbflat_pi2[rec_per_page]";
         private const int Page = 50;
         private const string HashParam = "hash";
-        private const int CurrencyByn = 933;
-        private const int CurrencyUsd = 840;
-        private const string RoomShared = "к";
 
         private readonly HttpClient _client = new HttpClient(
             new HttpClientHandler()
@@ -169,10 +166,11 @@ namespace Realt.Parser
                 ParseAddress(element, property);
                 ParsePrices(element, property);
 
-                //ParseRooms(element, property);
-                //ParseFloor(element, property);
-                //ParseYearSquareBalcony(element, property);
-                //ParseDate(element, property);
+                ParseRooms(element, property);
+                ParseFloor(element, property);
+                ParseDate(element, property);
+                ParseYear(element, property);
+                ParseSquare(element, property);
 
                 _logger.LogDebug("Completed [{0}]", property);
             }
@@ -185,11 +183,27 @@ namespace Realt.Parser
             return property;
         }
 
+        private void ParseSquare(AngleSharp.Dom.IElement element, Property property)
+        {
+            var m = Regex.Match(element.OuterHtml, @"([\d\.]{2,})\s(?:м)");
+            if (m.Success)
+            {
+                property.SquareTotal = Convert.ToDouble(m.Groups[1].Value);
+            }
+        }
+
+        private void ParseYear(AngleSharp.Dom.IElement element, Property property)
+        {
+            var m = Regex.Match(element.OuterHtml, @"(\d{4})(?:гп| г\.п\.)");
+            if (m.Success)
+            {
+                property.Year = Convert.ToInt32(m.Groups[1].Value);
+            }
+        }
+
         private static void ParseId(AngleSharp.Dom.IElement element, Property property)
         {
-            var url = element.QuerySelector("a.teaser-title").GetAttribute("href");
-
-            var m = Regex.Match(url, @"\/(\d+)\/");
+            var m = Regex.Match(element.OuterHtml, @"(?:ID)\s(\d+)");
             if (m.Success)
             {
                 var id = Convert.ToInt64(m.Groups[1].Value);
@@ -199,90 +213,35 @@ namespace Realt.Parser
 
         private static void ParseRooms(AngleSharp.Dom.IElement element, Property property)
         {
-            var rooms = element.QuerySelector(".bd-table-item-header div.kv span").InnerHtml.Trim().Split("/");
-            if (rooms.Length == 2)
+            var m = Regex.Match(element.OuterHtml, @"(\d+)(?:-комн\.)");
+            if (m.Success) 
             {
-                if (rooms[0] == RoomShared)
-                {
-                    property.Shared = true;
-                }
-                else
-                {
-                    if (!string.IsNullOrEmpty(rooms[0]))
-                    {
-                        property.RoomTotal = Convert.ToInt32(rooms[0]);
-                    }
-
-                    if (!string.IsNullOrEmpty(rooms[1]))
-                    {
-                        property.RoomSeparate = Convert.ToInt32(rooms[1]);
-                    }
-                }
+                property.RoomTotal = Convert.ToInt32(m.Groups[1].Value);
+                property.RoomSeparate = property.RoomTotal;
             }
         }
 
         private static void ParseAddress(AngleSharp.Dom.IElement element, Property property)
         {
-            var location = element.QuerySelector(".location").InnerHtml.Trim();
-
-            var m = Regex.Match(location, @"([\(\)]+)\((\w+) \w+\)");
+            var m = Regex.Match(element.OuterHtml, @"([^><]+)\(([^\s\(\)]+)\s(?:район\))");
             if (!m.Success)
             {
                 return;
             }
 
             property.Address = m.Groups[1].Value.Trim();
-            property.District = m.Groups[2].Value.Trim();
-
-            //var district = element.QuerySelector(".bd-table-item-header div.ra span").InnerHtml.Trim();
-            //property.District = district;
-
-            //var address = element.QuerySelector(".bd-table-item-header div.ad a").InnerHtml.Trim();
-            //property.Address = address;
-        }
-
-        private static void ParseYearSquareBalcony(AngleSharp.Dom.IElement element, Property property)
-        {
-            var pls = element.QuerySelectorAll(".bd-table-item-header div.pl span");
-            if (pls.Length >= 3)
-            {
-                // square
-                var square = pls[0].InnerHtml.Trim().Split("/");
-                if (square.Length == 3)
-                {
-                    property.SquareTotal = ConvertSquare(square[0]).GetValueOrDefault();
-                    property.SquareLiving = ConvertSquare(square[1]);
-                    property.SquareKitchen = ConvertSquare(square[2]);
-                }
-
-                // year
-                var year = pls[1].InnerHtml.Trim();
-                var m = Regex.Match(year, @"\d{4}");
-                if (m.Success)
-                {
-                    property.Year = Convert.ToInt32(m.Groups[0].Value);
-                }
-
-                // balcony
-                property.Balcony = pls[2].InnerHtml.Trim();
-            }
+            property.District = m.Groups[2].Value.ToLower().Substring(0, 3);
         }
 
         private static void ParseFloor(AngleSharp.Dom.IElement element, Property property)
         {
-            var floor = element.QuerySelector(".bd-table-item-header div.ee span").InnerHtml.Trim();
-            var m = Regex.Match(floor, @"(\d+)\w*\/(\d*) (\w*)");
+            var m = Regex.Match(element.OuterHtml, @"(\d+)\/(\d+) (?:этаж)");
             if (m.Success)
             {
                 property.Floor = ConvertFloor(m.Groups[1].Value);
                 if (m.Groups.Count > 2)
                 {
                     property.FloorTotal = ConvertFloor(m.Groups[2].Value);
-                }
-
-                if (m.Groups.Count > 3)
-                {
-                    property.Type = m.Groups[3].Value;
                 }
             }
         }
@@ -301,85 +260,31 @@ namespace Realt.Parser
 
         private static void ParseDate(AngleSharp.Dom.IElement element, Property property)
         {
-            var date = element.QuerySelector(".bd-table-item-wrapper .date span").InnerHtml.Trim().Split(".");
-            property.Created = new DateTime(
-                Convert.ToInt32(date[2]),
-                Convert.ToInt32(date[1]),
-                Convert.ToInt32(date[0]));
+            var m = Regex.Match(element.OuterHtml, @"(\d+)\.(\d+)\.(\d+)");
+            if (m.Success)
+            {
+                property.Created = new DateTime(
+                    Convert.ToInt32(m.Groups[3].Value),
+                    Convert.ToInt32(m.Groups[2].Value),
+                    Convert.ToInt32(m.Groups[1].Value));
+            }
         }
 
         private void ParsePrices(AngleSharp.Dom.IElement element, Property property)
         {
-            property.PriceByn = GetPrice(element, CurrencyByn);
-            property.PriceUsd = GetPrice(element, CurrencyUsd);
+            property.PriceByn = GetPrice(element, "BYN");
+            property.PriceUsd = GetPrice(element, "USD");
         }
 
-        private int? GetPrice(AngleSharp.Dom.IElement element, int currency)
+        private int? GetPrice(AngleSharp.Dom.IElement element, string currency)
         {
-            var priceElement = element.QuerySelector(".price-switchable");
-            if (priceElement == null)
+            var m = Regex.Match(element.OuterHtml, @$"([\d\s]+)(?:{currency})");
+            if (m.Success)
             {
-                return null;
+                return Convert.ToInt32(Regex.Replace(m.Groups[1].Value, @"\D", string.Empty));
             }
 
-            var valueRaw = priceElement.GetAttribute($"data-{currency}");
-            if (string.IsNullOrEmpty(valueRaw))
-            {
-                return null;
-            }
-
-            valueRaw = HttpUtility.HtmlDecode(valueRaw).Trim().Replace("\t", string.Empty);
-            valueRaw = Regex.Replace(valueRaw, @"[\D]", string.Empty);
-
-            return Convert.ToInt32(valueRaw);
+            return null;
         }
-
-        private static double? ConvertSquare(string square)
-        {
-            try
-            {
-                return Convert.ToDouble(square.Replace(",", "."));
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static int? ConvertRoom(string price)
-        {
-            try
-            {
-                return Convert.ToInt32(price);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        /*
-          
-        <div class="bd-table-item-header">
-            <div class="kv" style="width:5%;"> <span> 1/1 </span> </div>
-            <!-- kv -->
-            <div class="ra" style="width:5%;"> <span>Мос</span> </div>
-            <!-- ra -->
-            <div class="ad" style="width:30%;"> <a href="https://realt.by/sale/flats/object/1974774/" title="Минск, Карпова ул., 16" target="_blank">Минск, Карпова ул., 16</a>
-            </div>
-            <!-- ad -->
-            <div class="ee" style="width:10%;"> <span> 5/5 б </span> </div>
-            <!-- ee -->
-            <div class="pl" style="width:16%;"> <span>30/17,6/6</span> </div>
-            <!-- pl -->
-            <div class="pl" style="width:7%;"> <span> 1965 <br>2020 </span> </div>
-            <!-- pl -->
-            <div class="pl" style="width:7%;"> <span> бз </span> </div>
-            <!-- pl --><div class="cena" style="width:20%;">
-            <span class="price-switchable" data-0="42&amp;nbsp;000&amp;nbsp;$" data-840="42&amp;nbsp;000&amp;nbsp;$" data-978="35&amp;nbsp;457&amp;nbsp;€" data-112="1&amp;nbsp;083&amp;nbsp;млн&amp;nbsp;руб" data-933="108&amp;nbsp;276&amp;nbsp;руб"> ="1&amp;nbsp;182&amp;nbsp;€/кв.м." data-112="36,1&amp;nbsp;млн&amp;nbsp;руб/кв.м." data-933="3&amp;nbsp;609&amp;nbsp;руб/кв.м." data-643="108&amp;nbsp;173&amp;nbsp;<i class=&quot;fa fa-rub&quot;></i>/кв.м." data-nohide="1"> 1&nbsp;400&nbsp;$/кв.м. </span> </div>
-            <!-- cena -->
-        </div>
-         */
-
     }
 }
