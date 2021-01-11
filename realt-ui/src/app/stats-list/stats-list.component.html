@@ -1,0 +1,9 @@
+<ul class="stats-list" *ngIf="items.length > 0">
+    <li *ngFor="let item of items">
+        <span class="stats-cell stats-day">{{item.day}}</span>
+        <span class="stats-cell stats-total">{{item.total}}</span>
+    </li>
+</ul>
+
+
+
