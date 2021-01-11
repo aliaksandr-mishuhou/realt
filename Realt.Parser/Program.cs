@@ -15,7 +15,7 @@ namespace Realt.Parser
                 new AggregatedRepository(new IRepository[]
                 {
                     new CsvRepository(),
-                    new PgSqlRepository(PgSqlConnection, new DummyLogger<PgSqlRepository>()),
+                    //new PgSqlRepository(PgSqlConnection, new DummyLogger<PgSqlRepository>()),
                 }, new DummyLogger<AggregatedRepository>()),
                 new DummyLogger<Runner>());
             runner.RunAsync().Wait();

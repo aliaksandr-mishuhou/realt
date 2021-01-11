@@ -150,7 +150,7 @@ namespace Realt.Parser
 
             var resultHtml = await _client.GetStringAsync(url);
             var document = await _parser.ParseDocumentAsync(resultHtml);
-            var elements = document.QuerySelectorAll(".bd-table-item");
+            var elements = document.QuerySelectorAll(".listing-item[data-mode=3]");
             foreach (var element in elements)
             {
                 Property property = BuildProperty(element);
@@ -165,21 +165,14 @@ namespace Realt.Parser
             var property = new Property();
             try
             {
-                // .bd-table-item-header
                 ParseId(element, property);
-
-                ParseRooms(element, property);
-
                 ParseAddress(element, property);
-
-                ParseFloor(element, property);
-
-                ParseYearSquareBalcony(element, property);
-
                 ParsePrices(element, property);
 
-                // .bd-table-item-wrapper
-                ParseDate(element, property);
+                //ParseRooms(element, property);
+                //ParseFloor(element, property);
+                //ParseYearSquareBalcony(element, property);
+                //ParseDate(element, property);
 
                 _logger.LogDebug("Completed [{0}]", property);
             }
@@ -194,7 +187,7 @@ namespace Realt.Parser
 
         private static void ParseId(AngleSharp.Dom.IElement element, Property property)
         {
-            var url = element.QuerySelector(".bd-table-item-header div.ad a").GetAttribute("href");
+            var url = element.QuerySelector("a.teaser-title").GetAttribute("href");
 
             var m = Regex.Match(url, @"\/(\d+)\/");
             if (m.Success)
@@ -230,11 +223,22 @@ namespace Realt.Parser
 
         private static void ParseAddress(AngleSharp.Dom.IElement element, Property property)
         {
-            var district = element.QuerySelector(".bd-table-item-header div.ra span").InnerHtml.Trim();
-            property.District = district;
+            var location = element.QuerySelector(".location").InnerHtml.Trim();
 
-            var address = element.QuerySelector(".bd-table-item-header div.ad a").InnerHtml.Trim();
-            property.Address = address;
+            var m = Regex.Match(location, @"([\(\)]+)\((\w+) \w+\)");
+            if (!m.Success)
+            {
+                return;
+            }
+
+            property.Address = m.Groups[1].Value.Trim();
+            property.District = m.Groups[2].Value.Trim();
+
+            //var district = element.QuerySelector(".bd-table-item-header div.ra span").InnerHtml.Trim();
+            //property.District = district;
+
+            //var address = element.QuerySelector(".bd-table-item-header div.ad a").InnerHtml.Trim();
+            //property.Address = address;
         }
 
         private static void ParseYearSquareBalcony(AngleSharp.Dom.IElement element, Property property)
@@ -312,7 +316,7 @@ namespace Realt.Parser
 
         private int? GetPrice(AngleSharp.Dom.IElement element, int currency)
         {
-            var priceElement = element.QuerySelector("span.price-switchable");
+            var priceElement = element.QuerySelector(".price-switchable");
             if (priceElement == null)
             {
                 return null;
