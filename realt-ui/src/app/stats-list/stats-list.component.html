@@ -1,9 +1,26 @@
-<ul class="stats-list" *ngIf="items.length > 0">
-    <li *ngFor="let item of items">
-        <span class="stats-cell stats-day">{{item.day}}</span>
-        <span class="stats-cell stats-total">{{item.total}}</span>
-    </li>
-</ul>
+<div *ngIf="total > 0">
+  <table class="table table-striped">
+    <thead>
+      <th>Day</th>
+      <th>Amount</th>
+    </thead>
+    <tr *ngFor="let item of items | paginate: {
+      id: 'list_paginator',
+      itemsPerPage: 20,
+      currentPage: page,
+      totalItems: total
+    }">
+      <td>{{item.day}}</td>
+      <td>{{item.total}}</td>
+    </tr>
+  </table>
+  <pagination-controls id="list_paginator"
+    previousLabel="Prev"
+    nextLabel="Next"
+    (pageChange)="onPageChanged($event)"
+    >
+  </pagination-controls>
 
+</div>
 
-
+<div *ngIf="total <= 0">No Data</div>
