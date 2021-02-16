@@ -49,7 +49,7 @@ namespace Realt.Parser
             }
             catch (Exception ex)
             {
-                _logger.LogError("Fatal error", ex);
+                _logger.LogError(ex, "Fatal error");
             }
         }
 

@@ -28,7 +28,7 @@ namespace Realt.Parser.DataAccess
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Could not add range {repository.GetType()} / {scanId}", ex);
+                    _logger.LogError(ex, $"Could not add range {repository.GetType()} / {scanId}");
                     result = false;
                 }
             }
@@ -46,7 +46,7 @@ namespace Realt.Parser.DataAccess
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Could not clear {repository.GetType()} / {scanId}", ex);
+                    _logger.LogError(ex, $"Could not clear {repository.GetType()} / {scanId}");
                 }
             }
         }

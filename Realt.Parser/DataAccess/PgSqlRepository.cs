@@ -47,7 +47,7 @@ VALUES (@Id, @ScanId, @Scanned, @RoomTotal, @RoomSeparate, @Year, @SquareTotal, 
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError($"Could not save entities DB for {scanId}, attempt {i}", ex);
+                            _logger.LogError(ex, $"Could not save entities DB for {scanId}, attempt {i}");
                             result = false;
                         }
                     }
@@ -57,7 +57,7 @@ VALUES (@Id, @ScanId, @Scanned, @RoomTotal, @RoomSeparate, @Year, @SquareTotal, 
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Could not save data to DB for {scanId}", ex);
+                _logger.LogError(ex, $"Could not save data to DB for {scanId}");
                 return false;
             }
         }
@@ -74,7 +74,7 @@ VALUES (@Id, @ScanId, @Scanned, @RoomTotal, @RoomSeparate, @Year, @SquareTotal, 
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Could not clean up data for {scanId}", ex);
+                _logger.LogError(ex, $"Could not clean up data for {scanId}");
             }
         }
     }

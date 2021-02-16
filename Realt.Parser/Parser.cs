@@ -177,7 +177,7 @@ namespace Realt.Parser
             catch (Exception ex)
             {
                 property.Error = ex.ToString();
-                _logger.LogError("Could not transform [{0}]", property, ex);
+                _logger.LogError(ex, "Could not transform [{0}]", property);
             }
 
             return property;
