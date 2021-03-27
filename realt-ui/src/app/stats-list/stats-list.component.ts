@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Item } from 'src/services/item';
 import { StatsResponse } from 'src/services/stats.response';
 import { StatsService } from 'src/services/stats.service';
@@ -14,11 +15,12 @@ export class StatsListComponent implements OnInit {
   public page : number = 1;
   public total: number = 0;
 
-  constructor(private statsService : StatsService) { }
+  constructor(private statsService : StatsService, private router : Router) { }
 
   ngOnInit(): void {
-    this.statsService.getDaily().subscribe((response: StatsResponse) => {
-      this.items = response.items;
+    this.statsService.getDailyCount().subscribe((response: StatsResponse) => {
+      // change order
+      this.items = response.items.reverse();
       this.page = 1;
       this.total = this.items.length;
     });

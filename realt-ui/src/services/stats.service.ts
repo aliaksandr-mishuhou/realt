@@ -3,31 +3,26 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { StatsResponse } from './stats.response';
+import { StatsDayResponse } from './stats.day.response';
 
 @Injectable({ providedIn: 'root' })
 export class StatsService {
 
-  dailyStatsUrl = "http://localhost:8080/stats/daily";
+  dailyCountUrl = "http://localhost:8080/stats/daily/count";
+  dailyPriceUrl = "http://localhost:8080/stats/daily/price";
+  dayDetailsUrlFn = (day : String) => `http://localhost:8080/stats/daily/detailed/${day}`;
 
   constructor(private http: HttpClient) { }
 
-  public getDailyDemo(): Item[] {
-    let data: Item[] = [
-      { day: '2020-12-15', total: 150 },
-      { day: '2020-12-16', total: 120 },
-      { day: '2020-12-17', total: 125 },
-      { day: '2020-12-18', total: 133 },
-      { day: '2020-12-19', total: 112 },
-      { day: '2020-12-20', total: 112 },
-      { day: '2020-12-21', total: 112 },
-      { day: '2020-12-22', total: 140 },
-      { day: '2020-12-23', total: 121 },
-      { day: '2020-12-24', total: 122 },
-    ];
-    return data;
+  public getDailyCount(): Observable<StatsResponse> {
+    return this.http.get<StatsResponse>(this.dailyCountUrl);
   }
 
-  public getDaily(): Observable<StatsResponse> {
-    return this.http.get<StatsResponse>(this.dailyStatsUrl);
+  public getDailyPrice(): Observable<StatsResponse> {
+    return this.http.get<StatsResponse>(this.dailyPriceUrl);
+  }
+
+  public getDay(day : String): Observable<StatsDayResponse> {
+    return this.http.get<StatsDayResponse>(this.dayDetailsUrlFn(day));
   }
 }

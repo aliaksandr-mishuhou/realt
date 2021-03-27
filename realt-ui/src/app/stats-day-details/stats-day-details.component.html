@@ -1,0 +1,27 @@
+<p>Day: {{day}}</p>
+
+<div class="chart">
+  <canvas baseChart
+    [data]="pieChartData"
+    [labels]="pieChartLabels"
+    [chartType]="pieChartType"
+    [options]="pieChartOptions"
+    [colors]="pieChartColors"
+    [legend]="pieChartLegend">
+  </canvas>
+</div>
+
+<table class="table table-striped">
+  <thead>
+    <th>Rooms</th>
+    <th>Amount</th>
+    <th>Square</th>
+    <th>Price</th>
+  </thead>
+  <tr *ngFor="let item of items">
+    <td>{{item.rooms}}</td>
+    <td>{{item.total}}</td>
+    <td>{{item.squareMean}}</td>
+    <td>{{item.priceMean}}</td>
+  </tr>
+</table>

@@ -10,7 +10,11 @@
       currentPage: page,
       totalItems: total
     }">
-      <td>{{item.day}}</td>
+      <td>
+        <a routerLink="/stats/details/{{item.day}}">
+          {{item.day}}
+        </a>
+      </td>
       <td>{{item.total}}</td>
     </tr>
   </table>
