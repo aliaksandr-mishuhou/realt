@@ -1,12 +1,12 @@
 package com.realt.statsapi.controllers;
 
 import com.realt.statsapi.controllers.dto.StatsDetailsResponse;
-import com.realt.statsapi.controllers.dto.StatsResponse;
+import com.realt.statsapi.controllers.dto.StatsCountResponse;
+import com.realt.statsapi.controllers.dto.StatsPriceResponse;
 import com.realt.statsapi.data.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -22,25 +22,37 @@ public class StatsController {
     private static final Logger log = LoggerFactory.getLogger(StatsController.class);
 
     @Autowired
-    private StatsRepository statsRepository;
+    private StatsCountRepository statsCountRepository;
+
+    @Autowired
+    private StatsPriceRepository statsPriceRepository;
 
     @Autowired
     private StatsDetailsRepository statsDetailsRepository;
 
-    @GetMapping("/daily")
+    @GetMapping("/daily/count")
     public @ResponseBody
-    StatsResponse getDaily() {
+    StatsCountResponse getDailyCount() {
 
-        log.debug("Loading daily stats");
-        Collection<DailyItem> data = statsRepository.findAll();
-        log.info("Loaded daily stats: {}", data.size());
+        log.debug("Loading daily count stats");
+        Collection<DailyCountItem> data = statsCountRepository.findAll();
+        log.info("Loaded daily count stats: {}", data.size());
 
-        return new StatsResponse(data.toArray(new DailyItem[0]));
+        return new StatsCountResponse(data.toArray(new DailyCountItem[0]));
+    }
+
+    @GetMapping("/daily/price")
+    public @ResponseBody StatsPriceResponse getDailyPrice() {
+
+        log.debug("Loading daily price stats");
+        Collection<DailyPriceItem> data = statsPriceRepository.findAll();
+        log.info("Loaded daily price stats: {}", data.size());
+
+        return new StatsPriceResponse(data.toArray(new DailyPriceItem[0]));
     }
 
     @GetMapping("/daily/detailed")
-    public @ResponseBody
-    StatsDetailsResponse getDailyDetails() {
+    public @ResponseBody StatsDetailsResponse getDailyDetails() {
 
         log.debug("Loading detailed daily stats");
         Collection<DailyDetails> data = statsDetailsRepository.findAll();
@@ -48,7 +60,6 @@ public class StatsController {
 
         return new StatsDetailsResponse(data.toArray(new DailyDetails[0]));
     }
-
 
     @GetMapping("/daily/detailed/{day}")
     public @ResponseBody StatsDetailsResponse getDailyDetails(@PathVariable String day) {
