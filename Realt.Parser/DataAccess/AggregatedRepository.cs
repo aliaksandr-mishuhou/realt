@@ -36,13 +36,13 @@ namespace Realt.Parser.DataAccess
             return result;
         }
 
-        public async Task ClearAsync(string scanId)
+        public async Task ClearAsync(string scanId, int source)
         {
             foreach (var repository in _repositories)
             {
                 try
                 {
-                    await repository.ClearAsync(scanId);
+                    await repository.ClearAsync(scanId, source);
                 }
                 catch (Exception ex)
                 {

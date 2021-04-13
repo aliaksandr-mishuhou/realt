@@ -11,6 +11,9 @@ namespace Realt.Parser.Model
         public int? RoomSeparate { get; set; }
         public bool Shared { get; set; }
         public int? Year { get; set; }
+        public int? YearFrom { get; set; }
+        public int? YearTo { get; set; }
+        public bool New { get; set; }
         public double SquareTotal { get; set; }
         public double? SquareLiving { get; set; }
         public double? SquareKitchen { get; set; }
@@ -23,6 +26,8 @@ namespace Realt.Parser.Model
         public int? PriceUsd { get; set; }
         public int? PriceByn { get; set; }
         public DateTime Created { get; set; }
+
+        public int Source { get; set; }
 
         public string Error { get; set; }
 

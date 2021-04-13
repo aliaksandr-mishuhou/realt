@@ -8,6 +8,9 @@
   <ItemGroup>
     <Folder Include="Model\" />
     <Folder Include="DataAccess\" />
+    <Folder Include="Onliner\" />
+    <Folder Include="Realt\" />
+    <Folder Include="Onliner\Dto\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.14.0" />

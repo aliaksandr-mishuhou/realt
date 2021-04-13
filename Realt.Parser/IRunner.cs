@@ -4,6 +4,7 @@ namespace Realt.Parser
 {
     public interface IRunner
     {
-        Task RunAsync();
+        Task RunV1Async();
+        Task RunV2Async();
     }
 }

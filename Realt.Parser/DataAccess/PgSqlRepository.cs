@@ -13,18 +13,21 @@ namespace Realt.Parser.DataAccess
     {
         private readonly string _connectionString;
         private readonly ILogger<PgSqlRepository> _logger;
-
+        private readonly string _table;
         private const int RetryCount = 3;
 
-        private const string InsertSql = @"
-INSERT INTO history(
-	    id, scan_id, scanned, room_total, room_separate, year, square_total, square_living, square_kitchen, floor, floor_total, price_usd, price_byn, type, balcony, district, address, created, error)
-VALUES (@Id, @ScanId, @Scanned, @RoomTotal, @RoomSeparate, @Year, @SquareTotal, @SquareLiving, @SquareKitchen, @Floor, @FloorTotal, @PriceUsd, @PriceByn, @Type, @Balcony, @District, @Address, @Created, @Error);";
+        private const string DefaultTable = "history";
 
-        public PgSqlRepository(string connectionString, ILogger<PgSqlRepository> logger)
+        private const string InsertSql = @"
+INSERT INTO {0}(
+	    id, scan_id, source, scanned, room_total, room_separate, year, year_from, year_to, square_total, square_living, square_kitchen, floor, floor_total, price_usd, price_byn, type, balcony, district, address, created, error)
+VALUES (@Id, @ScanId, @Source, @Scanned, @RoomTotal, @RoomSeparate, @Year, @YearFrom, @YearTo, @SquareTotal, @SquareLiving, @SquareKitchen, @Floor, @FloorTotal, @PriceUsd, @PriceByn, @Type, @Balcony, @District, @Address, @Created, @Error);";
+
+        public PgSqlRepository(string connectionString, ILogger<PgSqlRepository> logger, string table = DefaultTable)
         {
             _connectionString = connectionString;
             _logger = logger;
+            _table = table;
         }
 
         public async Task<bool> AddRangeAsync(IEnumerable<Property> items, string scanId, DateTime scanned)
@@ -42,7 +45,7 @@ VALUES (@Id, @ScanId, @Scanned, @RoomTotal, @RoomSeparate, @Year, @SquareTotal, 
                     {
                         try
                         {
-                            await conn.ExecuteAsync(InsertSql, historyItems);
+                            await conn.ExecuteAsync(string.Format(InsertSql, _table), historyItems);
                             break;
                         }
                         catch (Exception ex)
@@ -62,19 +65,20 @@ VALUES (@Id, @ScanId, @Scanned, @RoomTotal, @RoomSeparate, @Year, @SquareTotal, 
             }
         }
 
-        public async Task ClearAsync(string scanId)
+        public async Task ClearAsync(string scanId, int source)
         {
             try
             {
                 using (var conn = new NpgsqlConnection(_connectionString))
                 {
                     await conn.OpenAsync();
-                    await conn.ExecuteAsync("DELETE FROM history WHERE scan_id = @ScanId", new { ScanId = scanId });
+                    await conn.ExecuteAsync($"DELETE FROM {_table} WHERE scan_id = @ScanId AND source = @Source", new { ScanId = scanId, Source = source });
+                    _logger.LogInformation($"Cleaned up data for {_table} / {scanId} / {source}");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Could not clean up data for {scanId}");
+                _logger.LogError(ex, $"Could not clean up data for {_table} / {scanId} / {source}");
             }
         }
     }

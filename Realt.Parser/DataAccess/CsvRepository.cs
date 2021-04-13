@@ -20,7 +20,7 @@ namespace Realt.Parser.DataAccess
             .ToList()
             .Select(x => x.Name);
 
-        public Task ClearAsync(string scanId)
+        public Task ClearAsync(string scanId, int source)
         {
             var path = GetPath();
             if (File.Exists(path))

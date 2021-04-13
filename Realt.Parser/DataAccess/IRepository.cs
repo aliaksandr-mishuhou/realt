@@ -7,8 +7,7 @@ namespace Realt.Parser.DataAccess
 {
     public interface IRepository
     {
-        Task ClearAsync(string scanId);
+        Task ClearAsync(string scanId, int source);
         Task<bool> AddRangeAsync(IEnumerable<Property> items, string scanId, DateTime scanned);
-        //Task<bool> AddRangeAsync(IEnumerable<PropertyHistory> items);
     }
 }
