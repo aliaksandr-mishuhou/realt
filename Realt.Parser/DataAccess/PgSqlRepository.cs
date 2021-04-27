@@ -14,7 +14,7 @@ namespace Realt.Parser.DataAccess
         private readonly string _connectionString;
         private readonly ILogger<PgSqlRepository> _logger;
         private readonly string _table;
-        private const int RetryCount = 3;
+        private const int RetryCount = 1;
 
         private const string DefaultTable = "history";
 
@@ -30,12 +30,12 @@ VALUES (@Id, @ScanId, @Source, @Scanned, @RoomTotal, @RoomSeparate, @Year, @Year
             _table = table;
         }
 
-        public async Task<bool> AddRangeAsync(IEnumerable<Property> items, string scanId, DateTime scanned)
+        public async Task<int> AddRangeAsync(IEnumerable<Property> items, string scanId, DateTime scanned)
         {
+            var result = 0;
+
             try
             {
-                
-                var result = true;
                 using (var conn = new NpgsqlConnection(_connectionString))
                 {
                     await conn.OpenAsync();
@@ -45,24 +45,23 @@ VALUES (@Id, @ScanId, @Source, @Scanned, @RoomTotal, @RoomSeparate, @Year, @Year
                     {
                         try
                         {
-                            await conn.ExecuteAsync(string.Format(InsertSql, _table), historyItems);
+                            var saved = await conn.ExecuteAsync(string.Format(InsertSql, _table), historyItems);
+                            result += saved;
                             break;
                         }
                         catch (Exception ex)
                         {
                             _logger.LogError(ex, $"Could not save entities DB for {scanId}, attempt {i}");
-                            result = false;
                         }
                     }
                 }
-
-                return result;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Could not save data to DB for {scanId}");
-                return false;
             }
+
+            return result;
         }
 
         public async Task ClearAsync(string scanId, int source)

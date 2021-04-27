@@ -16,8 +16,7 @@ tx_uedbflat_pi2[DATA][street_name][like][3]:
 tx_uedbflat_pi2[DATA][house_number][range][3]:
 tx_uedbflat_pi2[DATA][street_name][like][4]:
 tx_uedbflat_pi2[DATA][house_number][range][4]:
-tx_uedbflat_pi2[DATA][rooms][e][1]:
-tx_uedbflat_pi2[DATA][rooms][e][2]:
+tx_uedbflat_pi2[DATA][rooms][e][]:
 tx_uedbflat_pi2[DATA][building_year][ge]:
 tx_uedbflat_pi2[DATA][building_year][le]:
 tx_uedbflat_pi2[DATA][repair_year][ge]:

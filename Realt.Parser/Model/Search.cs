@@ -10,7 +10,8 @@
 
         public override string ToString()
         {
-            return $"years:{YearFrom}-{YearTo}, rooms:[{string.Join(",", Rooms)}], token={Token}";
+            var roomsStr = Rooms != null ? string.Join(",", Rooms) : null;
+            return $"years:{YearFrom}-{YearTo}, rooms:[{roomsStr}]";
         }
     }
 }

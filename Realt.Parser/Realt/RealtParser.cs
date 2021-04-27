@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -28,8 +29,6 @@ namespace Realt.Parser.Realt
 
         private const string YearFromParam = "tx_uedbflat_pi2[DATA][building_year][ge]";
         private const string YearToParam = "tx_uedbflat_pi2[DATA][building_year][le]";
-        private const string RoomFromParam = "tx_uedbflat_pi2[DATA][rooms][e][1]";
-        private const string RoomToParam = "tx_uedbflat_pi2[DATA][rooms][e][2]";
 
         private const int Page = 50;
         private const string HashParam = "hash";
@@ -50,6 +49,11 @@ namespace Realt.Parser.Realt
         public RealtParser(ILogger<RealtParser> logger)
         {
             _logger = logger;
+        }
+
+        public IEnumerable<Search> GetSearchSequence()
+        {
+            return new RealtSequence();
         }
 
         public Task<Info> GetInfoAsync()
@@ -84,28 +88,28 @@ namespace Realt.Parser.Realt
             };
         }
 
-        public async Task<IEnumerable<Property>> ReadPageAsync(string token, int page)
+        public Task<IEnumerable<Property>> ReadPageAsync(string token, int page)
+        {
+            return ReadPageAsync(new Search { Token = token }, page);
+        }
+
+        public async Task<IEnumerable<Property>> ReadPageAsync(Search search, int page)
         {
             var result = new List<Property>();
-            var url = string.Format(SearchUrlTemplate, HttpUtility.UrlEncode(token), page);
+            var url = string.Format(SearchUrlTemplate, HttpUtility.UrlEncode(search.Token), page);
 
-            _logger.LogInformation($"Loading {url}");
+            _logger.LogDebug($"Loading {url}");
 
             var resultHtml = await _client.GetStringAsync(url);
             var document = await _parser.ParseDocumentAsync(resultHtml);
             var elements = document.QuerySelectorAll(".listing-item[data-mode=3]");
             foreach (var element in elements)
             {
-                Property property = BuildProperty(element);
+                var property = BuildProperty(element);
                 result.Add(property);
             }
 
             return result;
-        }
-
-        public Task<IEnumerable<Property>> ReadPageAsync(Search search, int index)
-        {
-            return ReadPageAsync(search.Token, index);
         }
 
         #region parse Info
@@ -181,17 +185,6 @@ namespace Realt.Parser.Realt
             if (search.YearTo != null)
             {
                 parameters[YearToParam] = search.YearTo.ToString();
-            }
-            if (search.Rooms != null && search.Rooms.Any())
-            {
-                if (search.Rooms.Length == 1)
-                {
-                    parameters[RoomFromParam] = parameters[RoomToParam] = search.Rooms[0].ToString();
-                }
-                if (search.Rooms.Length > 1)
-                {
-                    parameters[RoomFromParam] = search.Rooms[0].ToString();
-                }
             }
         }
 

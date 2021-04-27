@@ -38,6 +38,11 @@ namespace Realt.Parser.Onliner
             _logger = logger;
         }
 
+        public IEnumerable<Search> GetSearchSequence()
+        {
+            return new OnlinerSequence();
+        }
+
         public async Task<Info> GetInfoAsync()
         {
             var dto = await ReadPageInternalAsync(0);
@@ -181,6 +186,5 @@ namespace Realt.Parser.Onliner
 
             return parameters;
         }
-
     }
 }

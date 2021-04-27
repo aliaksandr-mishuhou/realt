@@ -2,6 +2,7 @@
 //using Microsoft.Extensions.Logging;
 
 using System;
+using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
 using Realt.Parser.DataAccess;
 using Realt.Parser.Onliner;
@@ -9,8 +10,21 @@ using Realt.Parser.Realt;
 
 namespace Realt.Parser
 {
-    class Program
+    [Command(Name = "Parser")]
+    [HelpOption("-?")]
+    public class Program
     {
+        static void Main(string[] args) => CommandLineApplication.Execute<Program>(args);
+
+        [Option("-s|--source", Description = "Source: " + SourceRealtValue + ", " + SourceOnlinerValue)]
+        private string Source { get; set; }
+
+        [Option("-v|--version", Description = "Version: " + V1Value + ", " + V2Value)]
+        private string Version { get; set; }
+
+        [Option("-t|--table", Description = "DB table name")]
+        private string Table { get; set; }
+
         private static IConfigurationRoot ConfigurationRoot;
 
         private const string SourceOnlinerValue = "onliner";
@@ -18,16 +32,20 @@ namespace Realt.Parser
         private const string V1Value = "1";
         private const string V2Value = "2";
 
-        static void Main(string[] args)
+#pragma warning disable IDE0051 // Remove unused private members
+        private void OnExecute()
+#pragma warning restore IDE0051 // Remove unused private members
         {
             InitConfiguration();
+
             var config = ConfigurationRoot;
-            var source = config.GetValue<string>("Settings:Source");
-            var version = config.GetValue<string>("Settings:Version");
-            var table = config.GetValue<string>("Settings:Table");
+
+            InitInputParams(config);
+
+            Console.WriteLine($"{Source}, {Version}, {Table}");
 
             // parser
-            (IParserV1 parserV1, IParserV2 parserV2) = InitParser(source);
+            (IParserV1 parserV1, IParserV2 parserV2) = InitParser(Source);
 
             var connectionString = ConfigurationRoot.GetConnectionString("history");
 
@@ -37,18 +55,34 @@ namespace Realt.Parser
                 new AggregatedRepository(new IRepository[]
                 {
                     //new CsvRepository(),
-                    new PgSqlRepository(connectionString, new DummyLogger<PgSqlRepository>(), table),
+                    new PgSqlRepository(connectionString, new DummyLogger<PgSqlRepository>(), Table),
                 }, new DummyLogger<AggregatedRepository>()),
                 new DummyLogger<Runner>());
 
             // version
-            if (version == V2Value)
+            if (Version == V2Value)
             {
                 runner.RunV2Async().Wait();
                 return;
             }
 
             runner.RunV1Async().Wait();
+        }
+
+        private void InitInputParams(IConfigurationRoot config)
+        {
+            if (string.IsNullOrEmpty(Source))
+            {
+                Source = config.GetValue<string>("Settings:Source");
+            }
+            if (string.IsNullOrEmpty(Version))
+            {
+                Version = config.GetValue<string>("Settings:Version");
+            }
+            if (string.IsNullOrEmpty(Table))
+            {
+                Table = config.GetValue<string>("Settings:Table");
+            }
         }
 
         private static (IParserV1 parserV1, IParserV2 parserV2) InitParser(string source)

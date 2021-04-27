@@ -31,7 +31,7 @@ namespace Realt.Parser.DataAccess
             return Task.FromResult(0);
         }
 
-        public async Task<bool> AddRangeAsync(IEnumerable<Property> items, string scanId, DateTime scanned)
+        public async Task<int> AddRangeAsync(IEnumerable<Property> items, string scanId, DateTime scanned)
         {
             var path = GetPath();
 
@@ -44,7 +44,7 @@ namespace Realt.Parser.DataAccess
             var lines = items.Select(row => BuildCsvRow(row));
             await File.AppendAllLinesAsync(path, lines);
 
-            return true;
+            return items.Count();
         }
 
         private static string GetPath()

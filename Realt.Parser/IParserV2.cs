@@ -7,6 +7,7 @@ namespace Realt.Parser
     public interface IParserV2
     {
         int Source { get; }
+        IEnumerable<Search> GetSearchSequence();
         Task<Info> GetInfoAsync(Search search);
         Task<IEnumerable<Property>> ReadPageAsync(Search search, int index);
     }

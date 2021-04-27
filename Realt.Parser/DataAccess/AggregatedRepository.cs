@@ -17,19 +17,18 @@ namespace Realt.Parser.DataAccess
             _logger = logger;
         }
 
-        public async Task<bool> AddRangeAsync(IEnumerable<Property> items, string scanId, DateTime scanned)
+        public async Task<int> AddRangeAsync(IEnumerable<Property> items, string scanId, DateTime scanned)
         {
-            var result = true;
+            var result = 0;
             foreach (var repository in _repositories)
             {
                 try
                 {
-                    await repository.AddRangeAsync(items, scanId, scanned);
+                    result = await repository.AddRangeAsync(items, scanId, scanned);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, $"Could not add range {repository.GetType()} / {scanId}");
-                    result = false;
                 }
             }
 

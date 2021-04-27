@@ -16,11 +16,11 @@ namespace Realt.Parser
         private readonly IRepository _repository;
         private readonly ILogger<Runner> _logger;
 
-        private readonly int[] YearRanges = { 1900, 1950, 1960, 1970, 1980, 1990, 2000, 2005, 2010, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 };
-        private readonly int[] RoomRanges = { 1, 2, 3, 4, 5 };
-        private const int MaxRooms = 6;
+        //private readonly int[] YearRanges = { 1900, 1950, 1960, 1970, 1980, 1990, 2000, 2005, 2010, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 };
+        //private readonly int[] RoomRanges = { 1, 2, 3, 4, 5 };
+        //private const int MaxRooms = 6;
 
-        private readonly List<long> _ids = new List<long>();
+        private readonly List<long> _foundIds = new List<long>();
 
         public Runner(IParserV1 parserV1, IParserV2 parserV2, IRepository repository, ILogger<Runner> logger)
         {
@@ -84,34 +84,14 @@ namespace Realt.Parser
                 var sw = new Stopwatch();
                 sw.Start();
                 _logger.LogInformation("Starting...");
-                _ids.Clear();
+                _foundIds.Clear();
 
                 var scanId = DateTime.UtcNow.ToString("yyyy-MM-dd");
                 await _repository.ClearAsync(scanId, _parserV2.Source);
 
-                var search = new Search();
-
-                for (var y = 0; y < YearRanges.Length; y++)
+                foreach (var search in _parserV2.GetSearchSequence())
                 {
-                    search.YearFrom = YearRanges[y];
-                    search.YearTo = (y < YearRanges.Length - 1) ? (int?) YearRanges[y + 1] - 1 : null;
-
-                    for (var r = 0; r < RoomRanges.Length; r++)
-                    {
-                        var rooms = RoomRanges[r];
-                        if (r < RoomRanges.Length - 1)
-                        {
-                            search.Rooms = new int[] { rooms };
-                        }
-                        else
-                        {
-                            search.Rooms = Enumerable.Range(rooms, MaxRooms - rooms + 1).ToArray();
-                        }
-
-                        _logger.LogDebug($"Starting search [{search}]");
-                        await RunV2ChunkAsync(scanId, search);
-                        _logger.LogInformation($"Completed search [{search}]");
-                    }
+                    await RunV2ChunkAsync(scanId, search);
                 }
 
                 sw.Stop();
@@ -126,20 +106,34 @@ namespace Realt.Parser
 
         private async Task RunV2ChunkAsync(string scanId, Search search)
         {
+            _logger.LogInformation($"Starting search [{search}]");
+
             // load general info (total & token)
             var info = await _parserV2.GetInfoAsync(search);
-            _logger.LogDebug($"Total: {info.Total}, Pages: {info.TotalPages}, Token: {info.Token}");
+
+            _logger.LogInformation($"Found: total {info.Total}, pages: {info.TotalPages}, token: {info.Token}");
+
+            var totalFound = 0;
+            var totalSaved = 0;
+
             search.Token = info.Token;
 
             // load pages
             for (var i = 0; i <= info.TotalPages; i++)
             {
+                var sw = new Stopwatch();
+
+                sw.Start();
                 var items = await _parserV2.ReadPageAsync(search, i);
+                sw.Stop();
+                var parsingTs = sw.Elapsed;
+
                 var scanned = DateTime.UtcNow;
 
                 var found = items.Count();
+                totalFound += found;
 
-                _logger.LogDebug($"Page {i}: {found}");
+                _logger.LogDebug($"Page {i}: total = {found}");
 
                 if (found == 0)
                 {
@@ -147,24 +141,44 @@ namespace Realt.Parser
                     break;
                 }
 
-                // check duplicates
-                var duplicates = items.Select(i => i.Id).Intersect(_ids);
-                if (duplicates.Any())
+                // check duplicates #1
+                var selfDuplicates = items.GroupBy(i => i.Id)
+                    .Where(g => g.Count() > 1)
+                    .Select(g => g.Key);
+                if (selfDuplicates.Any())
                 {
-                    _logger.LogWarning($"Page {i}: found {duplicates.Count()} duplicates");
-                    items = items.Where(i => !duplicates.Contains(i.Id));
+                    _logger.LogWarning($"Page {i}: found {selfDuplicates.Count()} self duplicates");
+                    items = items.Where(i => !selfDuplicates.Contains(i.Id));
+                }
+
+                // check duplicates #2
+                var prevDuplicates = items.Select(i => i.Id).Intersect(_foundIds);
+                if (prevDuplicates.Any())
+                {
+                    _logger.LogWarning($"Page {i}: found {prevDuplicates.Count()} prev duplicates");
+                    items = items.Where(i => !prevDuplicates.Contains(i.Id));
                 }
 
                 // set year range properties
-                var extended = items.ToArray();
-                foreach (var item in extended)
+                var itemsForSave = items.ToArray();
+                foreach (var item in itemsForSave)
                 {
                     item.YearFrom = search.YearFrom;
                     item.YearTo = search.YearTo;
                 }
 
-                await _repository.AddRangeAsync(extended, scanId, scanned);
+                sw.Restart();
+                var saved = await _repository.AddRangeAsync(itemsForSave, scanId, scanned);
+                sw.Stop();
+                var writingTs = sw.Elapsed;
+
+                _foundIds.AddRange(itemsForSave.Select(i => i.Id));
+                totalSaved += saved;
+
+                _logger.LogInformation($"Page {i} saved: found = {found}, saved = {saved}, parsing = {parsingTs}, writing = {writingTs} (progress = {_foundIds.Count})");
             }
+
+            _logger.LogInformation($"Completed search [{search}]: expected = {info.Total}, found = {totalFound}, saved = {totalSaved} (progress = {_foundIds.Count})");
         }
 
         #endregion
