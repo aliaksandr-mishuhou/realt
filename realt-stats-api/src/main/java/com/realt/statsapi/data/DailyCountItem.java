@@ -15,18 +15,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Entity
 @Immutable
-@Subselect("SELECT \n" +
-        " scan_id as day, \n" +
-        " COUNT(*) as total,\n" +
-        " COUNT(*) filter (where room_total = 1) as total1,\n" +
-        " COUNT(*) filter (where room_total = 2) as total2,\n" +
-        " COUNT(*) filter (where room_total = 3) as total3,\n" +
-        " COUNT(*) filter (where room_total = 4) as total4,\n" +
-        " COUNT(*) filter (where room_total > 4) as total5plus\n" +
-        "FROM history\n" +
-        "WHERE room_total IS NOT NULL\n" +
-        "GROUP BY scan_id\n" +
-        "ORDER BY scan_id")
+@Subselect("SELECT * FROM f_daily_count()")
 public class DailyCountItem {
     @Id @Getter @Setter
     private LocalDate day;

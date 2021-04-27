@@ -6,29 +6,30 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @AllArgsConstructor
 @NoArgsConstructor
-public class DailyDetailsId implements Serializable {
+public class DailyYearId implements Serializable {
     @Getter
     @Setter
-    private String day;
+    private LocalDate day;
 
     @Getter
     @Setter
-    private int rooms;
+    private String years;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DailyDetailsId that = (DailyDetailsId) o;
-        return rooms == that.rooms && Objects.equals(day, that.day);
+        DailyYearId that = (DailyYearId) o;
+        return day.equals(that.day) && years.equals(that.years);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(day, rooms);
+        return Objects.hash(day, years);
     }
 }

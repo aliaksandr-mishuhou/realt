@@ -1,8 +1,6 @@
 package com.realt.statsapi.controllers;
 
-import com.realt.statsapi.controllers.dto.StatsDetailsResponse;
-import com.realt.statsapi.controllers.dto.StatsCountResponse;
-import com.realt.statsapi.controllers.dto.StatsPriceResponse;
+import com.realt.statsapi.controllers.dto.*;
 import com.realt.statsapi.data.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,32 +21,90 @@ public class StatsController {
 
     @Autowired
     private StatsCountRepository statsCountRepository;
+    @Autowired
+    private StatsCountYearRepository statsCountYearRepository;
 
     @Autowired
     private StatsPriceRepository statsPriceRepository;
+    @Autowired
+    private StatsPriceYearRepository statsPriceYearRepository;
 
     @Autowired
     private StatsDetailsRepository statsDetailsRepository;
 
-    @GetMapping("/daily/count")
+    @GetMapping("/daily/count-legacy")
     public @ResponseBody
     StatsCountResponse getDailyCount() {
+        var filter = new StatsFilter();
+        return getStatsCount(filter);
+    }
 
-        log.debug("Loading daily count stats");
-        Collection<DailyCountItem> data = statsCountRepository.findAll();
+    @GetMapping("/daily/count")
+    public @ResponseBody
+    StatsCountResponse getDailyCountV2(StatsFilter filter) {
+        return getStatsCount(filter);
+    }
+
+    private StatsCountResponse getStatsCount(StatsFilter filter) {
+        log.info("Loading daily count stats {}", filter);
+        Collection<DailyCountItem> data = statsCountRepository.find(
+                filter.getSource(),
+                filter.getStartDate(),
+                filter.getEndDate()
+        );
         log.info("Loaded daily count stats: {}", data.size());
 
         return new StatsCountResponse(data.toArray(new DailyCountItem[0]));
     }
 
-    @GetMapping("/daily/price")
-    public @ResponseBody StatsPriceResponse getDailyPrice() {
+    @GetMapping("/daily/count-year")
+    public @ResponseBody StatsCountYearResponse getDailyCountYear(StatsFilter filter) {
+        log.info("Loading daily count stats (year) {}", filter);
+        Collection<DailyCountYearItem> data = statsCountYearRepository.find(
+                filter.getSource(),
+                filter.getStartDate(),
+                filter.getEndDate()
+        );
+        log.info("Loaded daily count stats (year): {}", data.size());
 
-        log.debug("Loading daily price stats");
-        Collection<DailyPriceItem> data = statsPriceRepository.findAll();
+        return new StatsCountYearResponse(data.toArray(new DailyCountYearItem[0]));
+    }
+
+
+    @GetMapping("/daily/price-legacy")
+    public @ResponseBody StatsPriceResponse getDailyPrice() {
+        var filter = new StatsFilter();
+        return getStatsPrice(filter);
+    }
+
+    @GetMapping("/daily/price")
+    public @ResponseBody StatsPriceResponse getDailyPriceV2(StatsFilter filter) {
+        return getStatsPrice(filter);
+    }
+
+    private StatsPriceResponse getStatsPrice(StatsFilter filter) {
+        log.info("Loading daily price stats {}", filter);
+        Collection<DailyPriceItem> data = statsPriceRepository.find(
+                filter.getSource(),
+                filter.getStartDate(),
+                filter.getEndDate()
+        );
         log.info("Loaded daily price stats: {}", data.size());
 
         return new StatsPriceResponse(data.toArray(new DailyPriceItem[0]));
+    }
+
+    @GetMapping("/daily/price-year")
+    public @ResponseBody StatsPriceYearResponse getDailyPriceYear(StatsFilter filter) {
+        log.info("Loading daily price stats (year) {}", filter);
+        Collection<DailyPriceYearItem> data = statsPriceYearRepository.find(
+                filter.getSource(),
+                filter.getStartDate(),
+                filter.getEndDate()
+        );
+        log.info("Loaded daily price stats (year): {}", data.size());
+
+        return new StatsPriceYearResponse(data.toArray(new DailyPriceYearItem[0]));
     }
 
     @GetMapping("/daily/detailed")

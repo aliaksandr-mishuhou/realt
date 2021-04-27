@@ -7,16 +7,9 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface StatsPriceRepository extends JpaRepository<DailyPriceItem, LocalDate> {
-    @Query(value = "SELECT * FROM f_daily_price(:source, :start_date, :end_date);", nativeQuery = true)
-    List<DailyPriceItem> find(
-            @Param("source") short source,
-            @Param("start_date") LocalDate startDate,
-            @Param("end_date") LocalDate endDate
-    );
-
+public interface StatsPriceYearRepository extends JpaRepository<DailyPriceYearItem, DailyYearId> {
     @Query(value = "SELECT * FROM f_daily_price_year(:source, :start_date, :end_date);", nativeQuery = true)
-    List<DailyPriceYearItem> findWithYears(
+    List<DailyPriceYearItem> find(
             @Param("source") short source,
             @Param("start_date") LocalDate startDate,
             @Param("end_date") LocalDate endDate
