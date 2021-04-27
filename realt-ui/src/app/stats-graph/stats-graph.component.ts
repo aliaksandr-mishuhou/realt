@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ChartDataSets, ChartOptions, ChartType } from 'chart.js';
 import { Color, Label } from 'ng2-charts';
 import { Item } from 'src/services/item';
+import { Search } from 'src/services/search';
 import { StatsResponse } from 'src/services/stats.response';
 import { StatsService } from 'src/services/stats.service';
 
@@ -13,9 +14,7 @@ import { StatsService } from 'src/services/stats.service';
 })
 export class StatsGraphComponent implements OnInit {
 
-  //public items : Item[] = [];
-
-  private maxVisibleDays = 60;
+  private readonly DEFAULT_DAYS = 60;
 
   public lineChartData: ChartDataSets[] = [];
   public lineChartLabels: Label[] = [];
@@ -31,17 +30,22 @@ export class StatsGraphComponent implements OnInit {
 
   public lineChartLegend = true;
   public lineChartType: ChartType = 'line';
-  //public lineChartPlugins = [pluginAnnotations];
 
   private id : String;
 
+  private search : Search = new Search();
+
   constructor(private statsService : StatsService, private route : ActivatedRoute) {
     this.id = route.snapshot.data["id"];
-    console.log(".ctr: " + this.id);
+    this.search.source = route.snapshot.data["source"];
+    let today = new Date();
+    this.search.start = this.addDays(today, (-1) * this.DEFAULT_DAYS);
+    this.search.end = today;
   }
 
   ngOnInit(): void {
-    console.log("init: " + this.id);
+    console.log("init: " + this.id + "/" + this.search);
+
     if (this.id == "count"){
       this.initDailyCount();
     }
@@ -51,7 +55,7 @@ export class StatsGraphComponent implements OnInit {
   }
 
   private initDailyCount() {
-    this.statsService.getDailyCount().subscribe((response: StatsResponse) => {
+    this.statsService.getDailyCount(this.search).subscribe((response: StatsResponse) => {
       let items = this.getItemsFromResponse(response);
       //this.items = items;
      this.lineChartLabels = items.map(i => i.day);
@@ -67,7 +71,7 @@ export class StatsGraphComponent implements OnInit {
   }
 
   private initDailyPrice() {
-    this.statsService.getDailyPrice().subscribe((response: StatsResponse) => {
+    this.statsService.getDailyPrice(this.search).subscribe((response: StatsResponse) => {
      let items = this.getItemsFromResponse(response);
      //this.items = items;
      this.lineChartLabels = items.map(i => i.day);
@@ -83,14 +87,14 @@ export class StatsGraphComponent implements OnInit {
   }
 
   private getItemsFromResponse(response : StatsResponse) : Item[] {
-    let result = this.fixGaps(response.items);
-    if (result.length > this.maxVisibleDays) {
-      result = result.slice(result.length - 1 - this.maxVisibleDays);
-    }
+    let result = this.fixGaps(response.items, this.search.start);
+    // if (result.length > this.MAX_DAYS) {
+    //   result = result.slice(result.length - 1 - this.MAX_DAYS);
+    // }
     return result;
   }
 
-  private fixGaps(items : Item[]) : Item[] {
+  private fixGaps(items : Item[], start : Date) : Item[] {
 
     if (items == null || items.length == 0) {
       return items;
@@ -98,7 +102,7 @@ export class StatsGraphComponent implements OnInit {
 
     let result : Item[] = new Array();
 
-    let prevDate = new Date(items[0].day);
+    let prevDate = start;
     for (let item of items) {
       let curDate = new Date(item.day);
       let diffDays = this.getDiffDays(curDate, prevDate);
@@ -127,5 +131,4 @@ export class StatsGraphComponent implements OnInit {
   private addDays(date: Date, days: number): Date {
     return new Date(date.getTime() + (days * 1000 * 60 * 60 * 24));
   }
-
 }

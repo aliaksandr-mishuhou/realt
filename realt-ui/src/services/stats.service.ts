@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { StatsResponse } from './stats.response';
 import { StatsDayResponse } from './stats.day.response';
+import { Search } from './search';
 
 @Injectable({ providedIn: 'root' })
 export class StatsService {
@@ -14,15 +15,23 @@ export class StatsService {
 
   constructor(private http: HttpClient) { }
 
-  public getDailyCount(): Observable<StatsResponse> {
-    return this.http.get<StatsResponse>(this.dailyCountUrl);
+  public getDailyCount(search: Search = new Search()) : Observable<StatsResponse> {
+    return this.http.get<StatsResponse>(this.dailyCountUrl + "?" + this.buildQuery(search));
   }
 
-  public getDailyPrice(): Observable<StatsResponse> {
-    return this.http.get<StatsResponse>(this.dailyPriceUrl);
+  public getDailyPrice(search: Search = new Search()): Observable<StatsResponse> {
+    return this.http.get<StatsResponse>(this.dailyPriceUrl + "?" + this.buildQuery(search));
   }
 
   public getDay(day : String): Observable<StatsDayResponse> {
     return this.http.get<StatsDayResponse>(this.dayDetailsUrlFn(day));
+  }
+
+  private buildQuery(search: Search) : String {
+    var searchParams = new URLSearchParams();
+    searchParams.append("source", search.source.toString());
+    searchParams.append("start_date", search.start.toString());
+    searchParams.append("end_date", search.end.toString());
+    return searchParams.toString();
   }
 }
