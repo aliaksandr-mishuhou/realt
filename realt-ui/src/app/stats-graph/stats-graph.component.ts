@@ -2,10 +2,18 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChartDataSets, ChartOptions, ChartType } from 'chart.js';
 import { Color, Label } from 'ng2-charts';
+
+import { Observable } from 'rxjs';
 import { Item } from 'src/services/item';
 import { Search } from 'src/services/search';
 import { StatsResponse } from 'src/services/stats.response';
 import { StatsService } from 'src/services/stats.service';
+import { Line } from './line';
+// import { interpolateRgb } from 'd3-interpolate';
+import { DataUtils } from 'src/utils/data.utils';
+import { LineChartData } from '../line-chart/line-chart-data';
+import { LineChartItem } from '../line-chart/line-chart-item';
+
 
 @Component({
   selector: 'app-stats-graph',
@@ -14,121 +22,150 @@ import { StatsService } from 'src/services/stats.service';
 })
 export class StatsGraphComponent implements OnInit {
 
-  private readonly DEFAULT_DAYS = 60;
-
   public lineChartData: ChartDataSets[] = [];
   public lineChartLabels: Label[] = [];
 
+  // TODO: 1. fill data gaps
+  // TODO: 2. fixed colors
+
   public lineChartOptions: ChartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     scales: {
       xAxes: [{}],
       yAxes: [{ position: 'right' }]
     }
   };
-  public lineChartColors: Color[] = [];
 
-  public lineChartLegend = true;
-  public lineChartType: ChartType = 'line';
+  public lineChartColors: Color[] = [];
+  // public lineChartLegend = true;
+  // public lineChartType: ChartType = 'line';
 
   private id : String;
+  private years : boolean;
 
-  private search : Search = new Search();
+  public data: LineChartData | undefined;
+
+  public search : Search = new Search();
 
   constructor(private statsService : StatsService, private route : ActivatedRoute) {
+    // view type
     this.id = route.snapshot.data["id"];
-    this.search.source = route.snapshot.data["source"];
-    let today = new Date();
-    this.search.start = this.addDays(today, (-1) * this.DEFAULT_DAYS);
-    this.search.end = today;
+    this.years = route.snapshot.data["years"] != null;
   }
 
   ngOnInit(): void {
-    console.log("init: " + this.id + "/" + this.search);
-
-    if (this.id == "count"){
-      this.initDailyCount();
-    }
-    if (this.id == "price"){
-      this.initDailyPrice();
-    }
+    this.onSearch();
   }
 
-  private initDailyCount() {
-    this.statsService.getDailyCount(this.search).subscribe((response: StatsResponse) => {
-      let items = this.getItemsFromResponse(response);
-      //this.items = items;
-     this.lineChartLabels = items.map(i => i.day);
-     this.lineChartData = [
-       { data : items.map(i => i.total), label : "All" },
-       { data : items.map(i => i.total1), label : "1" },
-       { data : items.map(i => i.total2), label : "2" },
-       { data : items.map(i => i.total3), label : "3" },
-       { data : items.map(i => i.total4), label : "4" },
-       { data : items.map(i => i.total5plus), label : "5+", hidden : true },
-     ];
-   });
-  }
-
-  private initDailyPrice() {
-    this.statsService.getDailyPrice(this.search).subscribe((response: StatsResponse) => {
-     let items = this.getItemsFromResponse(response);
-     //this.items = items;
-     this.lineChartLabels = items.map(i => i.day);
-     this.lineChartData = [
-       { data : items.map(i => i.price), label : "All" },
-       { data : items.map(i => i.price1), label : "1" },
-       { data : items.map(i => i.price2), label : "2" },
-       { data : items.map(i => i.price3), label : "3" },
-       { data : items.map(i => i.price4), label : "4" },
-       { data : items.map(i => i.price5plus), label : "5+", hidden : true },
-     ];
-   });
-  }
-
-  private getItemsFromResponse(response : StatsResponse) : Item[] {
-    let result = this.fixGaps(response.items, this.search.start);
-    // if (result.length > this.MAX_DAYS) {
-    //   result = result.slice(result.length - 1 - this.MAX_DAYS);
-    // }
-    return result;
-  }
-
-  private fixGaps(items : Item[], start : Date) : Item[] {
-
-    if (items == null || items.length == 0) {
-      return items;
-    }
-
-    let result : Item[] = new Array();
-
-    let prevDate = start;
-    for (let item of items) {
-      let curDate = new Date(item.day);
-      let diffDays = this.getDiffDays(curDate, prevDate);
-      if (diffDays > 1) {
-        for (let i = 1; i < diffDays; i++) {
-          let empty : Item = { day: this.addDays(prevDate, i).toISOString().split('T')[0]};
-          //console.log("adding empty: " + empty.day);
-          result.push(empty);
+  public onSearch(){
+    console.log(this.search);
+    // TODO: use factory (id, years) => init(...)
+    if (this.years) {
+      if (this.id == "count"){
+        this.initDailyWithYear(this.statsService.getDailyCountWithYear(this.search), i => i.total);
+      }
+      if (this.id == "price"){
+        this.initDailyWithYear(this.statsService.getDailyPriceWithYear(this.search), i => i.price);
+      }
+    } else {
+      if (this.id == "count"){
+        this.initDaily(this.statsService.getDailyCount(this.search), [
+          { label: "All", mapFunc: i => i.total },
+          { label: "1", mapFunc: i => i.total1 },
+          { label: "2", mapFunc: i => i.total2 },
+          { label: "3", mapFunc: i => i.total3 },
+          { label: "4", mapFunc: i => i.total4 },
+          { label: "5+", mapFunc: i => i.total5plus, hidden: true }
+        ]);
         }
+      if (this.id == "price"){
+        this.initDaily(this.statsService.getDailyPrice(this.search), [
+          { label: "All", mapFunc: i => i.price },
+          { label: "1", mapFunc: i => i.price1 },
+          { label: "2", mapFunc: i => i.price2 },
+          { label: "3", mapFunc: i => i.price3 },
+          { label: "4", mapFunc: i => i.price4 },
+          { label: "5+", mapFunc: i => i.price5plus, hidden: true }
+        ]);
+        }
+    }
+  }
+
+  private initDaily(result: Observable<StatsResponse>, lines: Line[]) {
+    result.subscribe((response: StatsResponse) => {
+      // prepare
+      let items = DataUtils.fixGaps(response.items, this.search.start);
+      // data
+      const lineChartItems : LineChartItem[] = [];
+      for (let line of lines) {
+        lineChartItems.push({
+          label : line.label,
+          data : items.map(line.mapFunc),
+          hidden: line.hidden
+        });
       }
 
-      //console.log("adding regular: " + item.day);
-      result.push(item);
-      prevDate = curDate;
+      this.data = new LineChartData(items.map(i => i.day), lineChartItems);
+      this.updateGraph();
+   });
+  }
+
+  private initDailyWithYear(result: Observable<StatsResponse>, mapCallback: (i: Item) => any) {
+    result.subscribe((response: StatsResponse) => {
+      let items = response.items;
+
+      const visibleFromYear = 2000;
+
+      const itemsPerYear = items.reduce(function (r, a ) {
+        if (a.years == null || a.years == ""){
+          return null;
+        }
+        r[a.years] = r[a.years] || [];
+        r[a.years].push(a);
+        return r;
+      }, Object.create(null));
+
+      let labels : string[] = [];
+      const lineChartItems : LineChartItem[] = [];
+
+      const keys = Object.keys(itemsPerYear);
+      for (let key of keys) {
+        const lineItems = DataUtils.fixGaps(itemsPerYear[key], this.search.start);
+        if (labels.length == 0){
+          labels = lineItems.map(i => i.day);
+        }
+        const year = Number(key.substr(0, 4));
+        const lineChartItem = { data : lineItems.map(mapCallback), label: key, hidden: year < visibleFromYear };
+        lineChartItems.push(lineChartItem);
+      }
+
+      this.data = new LineChartData(labels, lineChartItems);
+      this.updateGraph();
+   });
+  }
+
+  private updateGraph() {
+    if (this.data == null) {
+      return;
     }
 
-    return result;
+    this.lineChartLabels = this.data.xLabels;
+    this.lineChartData = this.data.lines;
   }
 
-  private getDiffDays(date1: Date, date2: Date) : number {
-    let diffTime = Math.abs(date1.getTime() - date2.getTime());
-    let diffDays = Math.ceil(diffTime / (1000 * 3600 * 24));
-    return diffDays;
-  }
+  // private setLabelColors() {
 
-  private addDays(date: Date, days: number): Date {
-    return new Date(date.getTime() + (days * 1000 * 60 * 60 * 24));
-  }
+  //   const total = this.lineChartLabels.length;
+  //   const interpolator = interpolateRgb("red", "yellow");
+  //   const colors = new Array<Color>();
+
+  //   for (let i = 0; i < total; i++) {
+  //     const color = interpolator(i / total);
+
+  //     colors.push({ borderColor: color });
+  //   }
+
+  //   console.log(colors);
+  // }
 }

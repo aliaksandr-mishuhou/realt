@@ -10,7 +10,9 @@ import { Search } from './search';
 export class StatsService {
 
   dailyCountUrl = "http://localhost:8080/stats/daily/count";
+  dailyCountWithYearUrl = "http://localhost:8080/stats/daily/count-year";
   dailyPriceUrl = "http://localhost:8080/stats/daily/price";
+  dailyPriceWithYearUrl = "http://localhost:8080/stats/daily/price-year";
   dayDetailsUrlFn = (day : String) => `http://localhost:8080/stats/daily/detailed/${day}`;
 
   constructor(private http: HttpClient) { }
@@ -19,8 +21,16 @@ export class StatsService {
     return this.http.get<StatsResponse>(this.dailyCountUrl + "?" + this.buildQuery(search));
   }
 
+  public getDailyCountWithYear(search: Search = new Search()) : Observable<StatsResponse> {
+    return this.http.get<StatsResponse>(this.dailyCountWithYearUrl + "?" + this.buildQuery(search));
+  }
+
   public getDailyPrice(search: Search = new Search()): Observable<StatsResponse> {
     return this.http.get<StatsResponse>(this.dailyPriceUrl + "?" + this.buildQuery(search));
+  }
+
+  public getDailyPriceWithYear(search: Search = new Search()): Observable<StatsResponse> {
+    return this.http.get<StatsResponse>(this.dailyPriceWithYearUrl + "?" + this.buildQuery(search));
   }
 
   public getDay(day : String): Observable<StatsDayResponse> {

@@ -1,14 +1,32 @@
-<!-- <div class="flex-item">
-  <div style="display: block;"> -->
-<div>
-    <canvas baseChart
-                [datasets]="lineChartData"
-                [labels]="lineChartLabels"
-                [options]="lineChartOptions"
-                [colors]="lineChartColors"
-                [legend]="lineChartLegend"
-                [chartType]="lineChartType">
-    </canvas>
+<div class="grid-container">
+  <div class="grid-item filter">
+
+      <mat-form-field class="filter-item">
+        <mat-label>Source</mat-label>
+        <mat-select [(ngModel)]="search.source">
+          <mat-option value="1">Realt</mat-option>
+          <mat-option value="2">Onliner</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="filter-item">
+        <input matInput [matDatepicker]="picker1" [(ngModel)]="search.start" placeholder="Start">
+        <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+        <mat-datepicker #picker1></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field class="filter-item">
+        <input matInput [matDatepicker]="picker2" [(ngModel)]="search.end" placeholder="End">
+        <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+        <mat-datepicker #picker2></mat-datepicker>
+      </mat-form-field>
+
+      <button mat-button color="primary" class="filter-item" (click)="onSearch()">Search</button>
+
+  </div>
+
+  <app-line-chart [data]="data" class="grid-item graph"></app-line-chart>
+
+  <!-- <div class="grid-item summary">
+    SUMMARY
+  </div> -->
 </div>
-  <!-- </div>
-</div> -->

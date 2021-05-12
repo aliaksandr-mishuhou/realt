@@ -1,5 +1,6 @@
 export interface Item {
     day: string;
+    years?: string;
 
     total?: number;
     total1?: number;

@@ -11,6 +11,11 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { StatsDayDetailsComponent } from './stats-day-details/stats-day-details.component';
 import { ChartsModule } from 'ng2-charts';
 import { HeaderComponent } from './header/header.component';
+import { TestComponent } from './test/test.component';
+import { FormsModule } from '@angular/forms';
+import { MaterialModule } from './material.module';
+import { StatsOveviewComponent } from './stats-oveview/stats-oveview.component';
+import { LineChartComponent } from './line-chart/line-chart.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +23,10 @@ import { HeaderComponent } from './header/header.component';
     StatsListComponent,
     StatsGraphComponent,
     StatsDayDetailsComponent,
-    HeaderComponent
+    HeaderComponent,
+    TestComponent,
+    StatsOveviewComponent,
+    LineChartComponent
   ],
   imports: [
     BrowserModule,
@@ -26,7 +34,9 @@ import { HeaderComponent } from './header/header.component';
     RouterModule,
     AppRoutingModule,
     NgxPaginationModule,
-    ChartsModule
+    ChartsModule,
+    FormsModule,
+    MaterialModule
   ],
   providers: [],
   bootstrap: [AppComponent]

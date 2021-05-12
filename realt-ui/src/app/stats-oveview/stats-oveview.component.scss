@@ -1,0 +1,25 @@
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 80px 1fr 1fr;
+  gap: 5px;
+  height: 100%;
+  grid-template-areas:
+    "realt-diff onliner-diff"
+    "realt-total onliner-total"
+    "realt-price onliner-price"
+    ;
+}
+.realt-total { grid-area: realt-total; }
+.realt-price { grid-area: realt-price; }
+.realt-diff { grid-area: realt-diff; }
+.onliner-total { grid-area: onliner-total; }
+.onliner-price { grid-area: onliner-price; }
+.onliner-diff { grid-area: onliner-diff; }
+
+.grid-item {
+  border: 1px solid orange;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

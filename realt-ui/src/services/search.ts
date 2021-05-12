@@ -1,11 +1,14 @@
+import { DateTimeUtils } from 'src/utils/datetime.utils';
+
 export class Search {
   start: Date;
   end: Date;
   source: string;
 
   constructor(){
-    this.end = new Date();
-    this.start = new Date(this.end.getDate() - 60);
+    const today = new Date();
+    this.start = DateTimeUtils.addMonths(today, -2);
+    this.end = today;
     this.source = "1";
   }
 
