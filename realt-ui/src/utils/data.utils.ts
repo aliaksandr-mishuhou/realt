@@ -11,7 +11,8 @@ export class DataUtils {
     let result : Item[] = new Array();
 
     let prevDate = start;
-    for (let item of items) {
+    let sorted = items.sort((a, b) => DateTimeUtils.getDiffDays(new Date(b.day), new Date(a.day)));
+    for (let item of sorted) {
       let curDate = new Date(item.day);
       let diffDays = DateTimeUtils.getDiffDays(curDate, prevDate);
       if (diffDays > 1) {

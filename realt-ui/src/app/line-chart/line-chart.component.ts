@@ -1,7 +1,8 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { ChartDataSets, ChartOptions } from 'chart.js';
 import { Label } from 'ng2-charts';
-import { LineChartData } from './line-chart-data';
+// import { interpolateRgb } from 'd3-interpolate';
+import { LineChartData } from 'src/services/chart/line.chart.data';
 
 @Component({
   selector: 'app-line-chart',
@@ -42,4 +43,20 @@ export class LineChartComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     // DO NOTHING
   }
+
+  // private setLabelColors() {
+
+  //   const total = this.lineChartLabels.length;
+  //   const interpolator = interpolateRgb("red", "yellow");
+  //   const colors = new Array<Color>();
+
+  //   for (let i = 0; i < total; i++) {
+  //     const color = interpolator(i / total);
+
+  //     colors.push({ borderColor: color });
+  //   }
+
+  //   console.log(colors);
+  // }
+
 }

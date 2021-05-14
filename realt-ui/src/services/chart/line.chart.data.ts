@@ -1,4 +1,4 @@
-import { LineChartItem } from './line-chart-item';
+import { LineChartItem } from './line.chart.item';
 
 export class LineChartData {
   xLabels: string[];

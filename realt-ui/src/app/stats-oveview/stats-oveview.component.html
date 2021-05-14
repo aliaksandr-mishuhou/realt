@@ -2,20 +2,12 @@
   <div class="grid-item realt-diff">
     realt-diff
   </div>
-  <div class="grid-item realt-total">
-    realt-total
-  </div>
-  <div class="grid-item realt-price">
-    realt-price
-  </div>
+  <app-line-chart class="grid-item realt-total" [data]="countRealt"></app-line-chart>
+  <app-line-chart class="grid-item realt-price" [data]="priceRealt"></app-line-chart>
 
   <div class="grid-item onliner-diff">
     onliner diff
   </div>
-  <div class="grid-item onliner-total">
-    onliner-total
-  </div>
-  <div class="grid-item onliner-price">
-    onliner-price
-  </div>
+  <app-line-chart class="grid-item onliner-total" [data]="countOnliner"></app-line-chart>
+  <app-line-chart class="grid-item onliner-price" [data]="priceOnliner"></app-line-chart>
 </div>

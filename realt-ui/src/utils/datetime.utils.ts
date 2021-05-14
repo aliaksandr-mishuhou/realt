@@ -15,4 +15,8 @@ export class DateTimeUtils {
       newDate.setMonth(date.getMonth() + months);
       return newDate;
     }
+
+    public static toISOString(date: Date) : string {
+      return date.toISOString().split('T')[0];
+    }
 }

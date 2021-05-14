@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { StatsResponse } from './stats.response';
 import { StatsDayResponse } from './stats.day.response';
 import { Search } from './search';
+import { DateTimeUtils } from 'src/utils/datetime.utils';
 
 @Injectable({ providedIn: 'root' })
 export class StatsService {
@@ -40,8 +41,8 @@ export class StatsService {
   private buildQuery(search: Search) : String {
     var searchParams = new URLSearchParams();
     searchParams.append("source", search.source.toString());
-    searchParams.append("start_date", search.start.toString());
-    searchParams.append("end_date", search.end.toString());
+    searchParams.append("startDate", DateTimeUtils.toISOString(search.start));
+    searchParams.append("endDate", DateTimeUtils.toISOString(search.end));
     return searchParams.toString();
   }
 }
