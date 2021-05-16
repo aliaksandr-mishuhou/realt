@@ -1,0 +1,13 @@
+<div class="diff-container">
+  <ng-container
+    *ngIf="asc; then up; else down">
+  </ng-container>
+  <div *ngIf="fullInfo" class="diff-start-end">{{start}}{{sku}} &rarr; {{end}}{{sku}}</div>
+</div>
+
+<ng-template #up>
+  <div class="diff-value diff-up">&uarr; +{{value}}{{sku}} (+{{percent}}%)</div>
+</ng-template>
+<ng-template #down>
+  <div class="diff-value diff-down">&darr; -{{value}}{{sku}} (-{{percent}}%)</div>
+</ng-template>

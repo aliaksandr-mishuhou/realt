@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { MaterialModule } from './material.module';
 import { StatsOveviewComponent } from './stats-oveview/stats-oveview.component';
 import { LineChartComponent } from './line-chart/line-chart.component';
+import { DiffComponent } from './diff/diff.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { LineChartComponent } from './line-chart/line-chart.component';
     HeaderComponent,
     TestComponent,
     StatsOveviewComponent,
-    LineChartComponent
+    LineChartComponent,
+    DiffComponent
   ],
   imports: [
     BrowserModule,

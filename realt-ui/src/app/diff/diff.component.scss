@@ -1,0 +1,20 @@
+.diff-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 5px;
+  margin-left: 10px;
+  margin-right: 10px;
+  grid-template-areas:
+    "diff-value diff-start-end";
+}
+
+.diff-value {
+  grid-area: diff-value;
+  justify-content: center;
+  align-items: center;
+}
+.diff-up { color:green; }
+.diff-down { color: red; }
+
+.diff-start-end { grid-area: diff-start-end; }

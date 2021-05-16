@@ -1,13 +1,17 @@
 <div class="grid-container">
   <div class="grid-item realt-diff">
-    realt-diff
+    <span>Realt: </span>
+    <app-diff [start]="priceRealtStart" [end]="priceRealtEnd" [sku]="'$'" [fullInfo]="true"></app-diff>
+    <app-diff [start]="countRealtStart" [end]="countRealtEnd" [fullInfo]="true"></app-diff>
   </div>
-  <app-line-chart class="grid-item realt-total" [data]="countRealt"></app-line-chart>
   <app-line-chart class="grid-item realt-price" [data]="priceRealt"></app-line-chart>
+  <app-line-chart class="grid-item realt-total" [data]="countRealt"></app-line-chart>
 
   <div class="grid-item onliner-diff">
-    onliner diff
+    <span>Onliner: </span>
+    <app-diff [start]="priceOnlinerStart" [end]="priceOnlinerEnd" [sku]="'$'" [fullInfo]="true"></app-diff>
+    <app-diff [start]="countOnlinerStart" [end]="countOnlinerEnd" [fullInfo]="true"></app-diff>
   </div>
-  <app-line-chart class="grid-item onliner-total" [data]="countOnliner"></app-line-chart>
   <app-line-chart class="grid-item onliner-price" [data]="priceOnliner"></app-line-chart>
+  <app-line-chart class="grid-item onliner-total" [data]="countOnliner"></app-line-chart>
 </div>

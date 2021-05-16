@@ -6,8 +6,8 @@
   height: 100%;
   grid-template-areas:
     "realt-diff onliner-diff"
-    "realt-total onliner-total"
     "realt-price onliner-price"
+    "realt-total onliner-total"
     ;
 }
 .realt-total { grid-area: realt-total; }
