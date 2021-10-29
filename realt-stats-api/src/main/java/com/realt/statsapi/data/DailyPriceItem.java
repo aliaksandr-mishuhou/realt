@@ -21,15 +21,15 @@ public class DailyPriceItem {
     private LocalDate day;
 
     @Getter @Setter
-    private int price;
+    private Integer price;
     @Getter @Setter
-    private int price1;
+    private Integer price1;
     @Getter @Setter
-    private int price2;
+    private Integer price2;
     @Getter @Setter
-    private int price3;
+    private Integer price3;
     @Getter @Setter
-    private int price4;
+    private Integer price4;
     @Getter @Setter
-    private int price5plus;
+    private Integer price5plus;
 }

@@ -1,0 +1,28 @@
+.daily-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 60px 1fr 1fr;
+  gap: 0px 0px;
+  grid-template-areas:
+    "daily-filter daily-filter"
+    "daily-data-1-1 daily-data-1-2"
+    "daily-data-2-1 daily-data-2-2";
+}
+.daily-filter { grid-area: daily-filter; }
+.daily-data-1-1 { grid-area: daily-data-1-1; }
+.daily-data-1-2 { grid-area: daily-data-1-2; }
+.daily-data-2-1 { grid-area: daily-data-2-1; }
+.daily-data-2-2 { grid-area: daily-data-2-2; }
+
+.grid-item {
+  border: 1px solid orange;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.filter-item {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+

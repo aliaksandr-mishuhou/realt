@@ -1,27 +1,50 @@
-<p>Day: {{day}}</p>
+<div class="daily-container">
+  <div class="daily-filter grid-item">
+    <!-- <mat-form-field class="filter-item">
+      <mat-label>Day</mat-label>
+      <div>{{day}}</div>
+    </mat-form-field> -->
+    <div class="filter-item">{{day}}</div>
 
-<div class="chart">
-  <canvas baseChart
-    [data]="pieChartData"
-    [labels]="pieChartLabels"
-    [chartType]="pieChartType"
-    [options]="pieChartOptions"
-    [colors]="pieChartColors"
-    [legend]="pieChartLegend">
-  </canvas>
+    <mat-form-field class="filter-item">
+      <!-- <mat-label>Source</mat-label> -->
+      <mat-select [(ngModel)]="source">
+        <mat-option value="1">Realt</mat-option>
+        <mat-option value="2">Onliner</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+  </div>
+
+  <div class="daily-data-1-1 grid-item">
+    <canvas baseChart
+      [data]="pieChartData"
+      [labels]="pieChartLabels"
+      [chartType]="pieChartType"
+      [options]="pieChartOptions"
+      [colors]="pieChartColors"
+      [legend]="pieChartLegend">
+    </canvas>
+  </div>
+  <div class="daily-data-1-2 grid-item">
+    <table class="table table-striped">
+      <thead>
+        <th>Rooms</th>
+        <th>Amount</th>
+        <th>Square</th>
+        <th>Price</th>
+      </thead>
+      <tr *ngFor="let item of items">
+        <td>{{item.rooms}}</td>
+        <td>{{item.total}}</td>
+        <td>{{item.squareMean}}</td>
+        <td>{{item.priceMean}}</td>
+      </tr>
+    </table>
+
+  </div>
+
+  <div class="daily-data-2-1 grid-item">TODO 2-1</div>
+  <div class="daily-data-2-2 grid-item">TODO 2-2</div>
 </div>
 
-<table class="table table-striped">
-  <thead>
-    <th>Rooms</th>
-    <th>Amount</th>
-    <th>Square</th>
-    <th>Price</th>
-  </thead>
-  <tr *ngFor="let item of items">
-    <td>{{item.rooms}}</td>
-    <td>{{item.total}}</td>
-    <td>{{item.squareMean}}</td>
-    <td>{{item.priceMean}}</td>
-  </tr>
-</table>

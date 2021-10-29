@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ChartOptions, ChartType } from 'chart.js';
 import { Label } from 'ng2-charts/lib/base-chart.directive';
-//import * as pluginDataLabels from 'chartjs-plugin-datalabels';
 import { RoomItem } from 'src/services/room.item';
 import { StatsDayResponse } from 'src/services/stats.day.response';
 import { StatsService } from 'src/services/stats.service';
+import { DateTimeUtils } from 'src/utils/datetime.utils';
 
 @Component({
   selector: 'app-stats-day-details',
@@ -13,7 +13,8 @@ import { StatsService } from 'src/services/stats.service';
   styleUrls: ['./stats-day-details.component.scss']
 })
 export class StatsDayDetailsComponent implements OnInit {
-  day: String;
+  public day: string;
+  public source: string = "1";
   public items : RoomItem[] = [];
 
   // pie chart
@@ -44,7 +45,7 @@ export class StatsDayDetailsComponent implements OnInit {
     console.log(this.day);
     if (this.day == null){
       var today = new Date();
-      this.day = today.toISOString().split('T')[0];
+      this.day = DateTimeUtils.toISOString(today);
     }
   }
 
@@ -75,5 +76,9 @@ export class StatsDayDetailsComponent implements OnInit {
         return (i.rooms > 0) ? i.rooms.toString() : split + "+";
       });
     });
+  }
+
+  public onRefresh(){
+    // TODO
   }
 }

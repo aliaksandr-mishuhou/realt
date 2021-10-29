@@ -6,15 +6,16 @@ import { StatsResponse } from './stats.response';
 import { StatsDayResponse } from './stats.day.response';
 import { Search } from './search';
 import { DateTimeUtils } from 'src/utils/datetime.utils';
+import { environment } from 'src/environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class StatsService {
 
-  dailyCountUrl = "http://localhost:8080/stats/daily/count";
-  dailyCountWithYearUrl = "http://localhost:8080/stats/daily/count-year";
-  dailyPriceUrl = "http://localhost:8080/stats/daily/price";
-  dailyPriceWithYearUrl = "http://localhost:8080/stats/daily/price-year";
-  dayDetailsUrlFn = (day : String) => `http://localhost:8080/stats/daily/detailed/${day}`;
+  dailyCountUrl = `${environment.STATS_URL}/stats/daily/count`;
+  dailyCountWithYearUrl = `${environment.STATS_URL}/stats/daily/count-year`;
+  dailyPriceUrl = `${environment.STATS_URL}/stats/daily/price`;
+  dailyPriceWithYearUrl = `${environment.STATS_URL}/stats/daily/price-year`;
+  dayDetailsUrlFn = (day : String) =>  `${environment.STATS_URL}/stats/daily/detailed/${day}`;
 
   constructor(private http: HttpClient) { }
 
@@ -34,7 +35,11 @@ export class StatsService {
     return this.http.get<StatsResponse>(this.dailyPriceWithYearUrl + "?" + this.buildQuery(search));
   }
 
-  public getDay(day : String): Observable<StatsDayResponse> {
+  public getDay(day : string, source: string = "1"): Observable<StatsDayResponse> {
+    // const search = new Search();
+    // search.source = source;
+    // search.start = day;
+    // search.end = day;
     return this.http.get<StatsDayResponse>(this.dayDetailsUrlFn(day));
   }
 

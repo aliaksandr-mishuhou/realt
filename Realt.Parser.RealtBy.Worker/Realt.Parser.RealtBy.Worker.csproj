@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>dotnet-Realt.Parser.RealtBy.Worker-87E86932-EEB1-4F9B-9DCC-51DF36827529</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.15" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.2.0" />
+    <PackageReference Include="Serilog.Sinks.Http" Version="7.2.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Realt.Parser.Core\Realt.Parser.Core.csproj" />
+    <ProjectReference Include="..\Realt.Parser.RealtBy\Realt.Parser.RealtBy.csproj" />
+    <ProjectReference Include="..\Realt.Parser.Repository.Rest\Realt.Parser.Repository.Rest.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Remove="appsettings.Development.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Serilog.Sinks.Elasticsearch" />
+    <None Remove="Serilog.Sinks.Network" />
+    <None Remove="Serilog.Extensions.Logging" />
+    <None Remove="Serilog.Settings.Configuration" />
+    <None Remove="Serilog.Sinks.Http" />
+    <None Remove="Serilog.Sinks.Console" />
+    <None Remove="Serilog.Formatting.Compact" />
+  </ItemGroup>
+</Project>

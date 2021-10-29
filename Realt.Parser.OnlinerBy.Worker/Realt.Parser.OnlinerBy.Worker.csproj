@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>dotnet-Realt.Parser.OnlinerBy.Worker-639758A0-BC2F-4FF8-B5C7-A777C697CEF9</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.15" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Realt.Parser.Core\Realt.Parser.Core.csproj" />
+    <ProjectReference Include="..\Realt.Parser.OnlinerBy\Realt.Parser.OnlinerBy.csproj" />
+    <ProjectReference Include="..\Realt.Parser.Repository.Rest\Realt.Parser.Repository.Rest.csproj" />
+  </ItemGroup>
+</Project>

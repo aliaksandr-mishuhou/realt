@@ -21,15 +21,15 @@ public class DailyCountItem {
     private LocalDate day;
 
     @Getter @Setter
-    private int total;
+    private Integer total;
     @Getter @Setter
-    private int total1;
+    private Integer total1;
     @Getter @Setter
-    private int total2;
+    private Integer total2;
     @Getter @Setter
-    private int total3;
+    private Integer total3;
     @Getter @Setter
-    private int total4;
+    private Integer total4;
     @Getter @Setter
-    private int total5plus;
+    private Integer total5plus;
 }

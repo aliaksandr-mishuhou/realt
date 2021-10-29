@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Realt.Parser.RealtBy.Worker": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

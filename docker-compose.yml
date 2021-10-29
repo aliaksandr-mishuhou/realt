@@ -1,0 +1,72 @@
+version: '3.4'
+
+services:
+
+  ui-lb:
+    image: nginx:latest
+    volumes:
+      - ./nginx-ui.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - ui
+    ports:
+      - "80:80"
+    networks: 
+      - backend
+      
+  ui:
+    image: realt.ui
+    environment:
+      STATS_URL: 'http://stats-api-lb:8080'
+    expose:
+      - "80"
+    depends_on:
+      - stats-api-lb
+    networks: 
+      - backend
+
+  # BACKEND
+
+  stats-api-lb:
+    image: nginx:latest
+    volumes:
+      - ./nginx-api.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - stats-api
+    ports:
+      - "8080:8080"
+    networks: 
+      - backend
+      
+  stats-api:
+    image: realt.stats.api
+    environment:
+      spring_datasource_url: 'jdbc:postgresql://35.228.0.230:5432/realt' 
+      spring_datasource_úsername: 'realt'
+      spring_datasource_password: 'Hellorealt0!'
+    expose:
+      - "8080"
+    networks: 
+      - backend
+
+  parser-realt:
+    image: realt.parser.realt
+    environment:
+      RepositoryServiceUrl: 'http://stats-api-lb:8080'
+      Serilog_WriteTo_Args_requestUri: 'http://localhost:5000'
+    networks: 
+      - backend
+
+  parser-onliner:
+    image: realt.parser.onliner
+    environment:
+      RepositoryServiceUrl: 'http://stats-api-lb:8080'
+      Serilog_WriteTo_Args_requestUri: 'http://localhost:5000'
+    networks: 
+      - backend 
+      
+volumes:
+  data: 
+  
+networks:
+  backend:
+    driver: "bridge"      

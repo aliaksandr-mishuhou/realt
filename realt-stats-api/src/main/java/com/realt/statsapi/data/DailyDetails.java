@@ -16,6 +16,7 @@ import java.time.LocalDate;
 @Entity
 @Immutable
 @IdClass(DailyDetailsId.class)
+// TODO: move to stored procedure
 @Subselect("SELECT\n" +
         "\tscan_id as day,\n" +
         "\troom_total as rooms,\n" +
