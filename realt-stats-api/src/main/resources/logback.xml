@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-<!--    <appender name="stash1" class="net.logstash.logback.appender.LogstashTcpSocketAppender">-->
-<!--        <destination>localhost:5001</destination>-->
-<!--        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />-->
-<!--    </appender>-->
+    <appender name="stash-tcp" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:5001</destination>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
 
-    <appender name="stash2"
+    <appender name="stash-http"
               class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
         <ringBufferSize>8192</ringBufferSize>
         <appender class="de.idealo.whitelabels.logback.HttpAppender">
@@ -42,7 +42,6 @@
     <root level="INFO">
         <appender-ref ref="stdout" />
         <appender-ref ref="file" />
-        <!--<appender-ref ref="stash1" />-->
-        <appender-ref ref="stash2" />
+        <appender-ref ref="stash-http" />
     </root>
 </configuration>
