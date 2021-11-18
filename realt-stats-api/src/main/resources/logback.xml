@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="stash-tcp" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:5001</destination>
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
-    </appender>
 
     <appender name="stash-http"
               class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
         <ringBufferSize>8192</ringBufferSize>
         <appender class="de.idealo.whitelabels.logback.HttpAppender">
             <httpClient class="de.idealo.whitelabels.logback.HttpClient">
-                <destination>http://localhost:5001</destination>
+                <destination>${LOGSTASH_URL:-http://localhost:5001}</destination>
             </httpClient>
             <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
         </appender>
@@ -42,6 +38,6 @@
     <root level="INFO">
         <appender-ref ref="stdout" />
         <appender-ref ref="file" />
-        <appender-ref ref="stash-http" />
+<!--        <appender-ref ref="stash-http" />-->
     </root>
 </configuration>

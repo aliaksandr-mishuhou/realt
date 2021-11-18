@@ -43,29 +43,114 @@ services:
       spring_datasource_url: 'jdbc:postgresql://35.228.0.230:5432/realt' 
       spring_datasource_úsername: 'realt'
       spring_datasource_password: 'Hellorealt0!'
+      LOGSTASH_URL: 'http://host.docker.internal:5001'
     expose:
       - "8080"
     networks: 
       - backend
+    # depends_on:
+    #   - logstash
 
   parser-realt:
     image: realt.parser.realt
     environment:
       RepositoryServiceUrl: 'http://stats-api-lb:8080'
-      Serilog_WriteTo_Args_requestUri: 'http://localhost:5000'
+      ExecutionTime: '00:59:00'
+      Serilog_WriteTo_Args_requestUri: 'http://host.docker.internal:5000'
     networks: 
       - backend
+    depends_on:
+      - stats-api-lb
+    #   - logstash
 
   parser-onliner:
     image: realt.parser.onliner
     environment:
       RepositoryServiceUrl: 'http://stats-api-lb:8080'
-      Serilog_WriteTo_Args_requestUri: 'http://localhost:5000'
+      ExecutionTime: '23:59:00'
+      Serilog_WriteTo_Args_requestUri: 'http://host.docker.internal:5000'
     networks: 
       - backend 
+    depends_on:
+      - stats-api-lb
+    #   - logstash
+
+  # ELK
+
+  # elasticsearch:
+  #   build:
+  #     context: elasticsearch/
+  #     args:
+  #       ELK_VERSION: $ELK_VERSION
+  #   volumes:
+  #     - type: bind
+  #       source: ./elasticsearch/config/elasticsearch.yml
+  #       target: /usr/share/elasticsearch/config/elasticsearch.yml
+  #       read_only: true
+  #     - type: volume
+  #       source: elasticsearch
+  #       target: /usr/share/elasticsearch/data
+  #   ports:
+  #     - "9200:9200"
+  #     - "9300:9300"
+  #   environment:
+  #     ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+  #     ELASTIC_USER: elastic
+  #     ELASTIC_PASSWORD: elastic
+  #     # Use single node discovery in order to disable production mode and avoid bootstrap checks
+  #     # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+  #     discovery.type: single-node
+  #   networks:
+  #     - backend
+
+  # logstash:
+  #   build:
+  #     context: logstash/
+  #     args:
+  #       ELK_VERSION: $ELK_VERSION
+  #   volumes:
+  #     - type: bind
+  #       source: ./logstash/config/logstash.yml
+  #       target: /usr/share/logstash/config/logstash.yml
+  #       read_only: true
+  #     - type: bind
+  #       source: ./logstash/pipeline
+  #       target: /usr/share/logstash/pipeline
+  #       read_only: true
+  #   ports:
+  #     - "5000:5000/tcp"
+  #     - "5000:5000/udp"
+  #     - "5001:5001/tcp"
+  #     - "5001:5001/udp"
+  #     - "9600:9600"
+  #   environment:
+  #     LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+  #   networks:
+  #     - backend
+  #   depends_on:
+  #     - elasticsearch
+
+  # kibana:
+  #   build:
+  #     context: kibana/
+  #     args:
+  #       ELK_VERSION: $ELK_VERSION
+  #   volumes:
+  #     - type: bind
+  #       source: ./kibana/config/kibana.yml
+  #       target: /usr/share/kibana/config/kibana.yml
+  #       read_only: true
+  #   ports:
+  #     - "5601:5601"
+  #   networks:
+  #     - backend
+  #   depends_on:
+  #     - elasticsearch
+
       
 volumes:
-  data: 
+  data:
+  # elasticsearch:
   
 networks:
   backend:

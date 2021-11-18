@@ -25,7 +25,7 @@ services:
       # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
     networks:
-      - elk
+      - backend
 
   logstash:
     build:
@@ -50,7 +50,7 @@ services:
     environment:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
     networks:
-      - elk
+      - backend
     depends_on:
       - elasticsearch
 
@@ -67,12 +67,12 @@ services:
     ports:
       - "5601:5601"
     networks:
-      - elk
+      - backend
     depends_on:
       - elasticsearch
 
 networks:
-  elk:
+  backend:
     driver: bridge
 
 volumes:
