@@ -4,10 +4,8 @@ import { StatsDayDetailsComponent } from './stats-day-details/stats-day-details.
 import { StatsGraphComponent } from './stats-graph/stats-graph.component';
 import { StatsListComponent } from './stats-list/stats-list.component';
 import { StatsOveviewComponent } from './stats-oveview/stats-oveview.component';
-import { TestComponent } from './test/test.component';
 
 const routes: Routes = [
-  { path: 'test', component: TestComponent },
   { path: 'stats/overview', component: StatsOveviewComponent },
   { path: 'stats/list', component: StatsListComponent },
   { path: 'stats/details/:day', component: StatsDayDetailsComponent },

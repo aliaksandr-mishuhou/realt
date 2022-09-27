@@ -11,7 +11,6 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { StatsDayDetailsComponent } from './stats-day-details/stats-day-details.component';
 import { ChartsModule } from 'ng2-charts';
 import { HeaderComponent } from './header/header.component';
-import { TestComponent } from './test/test.component';
 import { FormsModule } from '@angular/forms';
 import { MaterialModule } from './material.module';
 import { StatsOveviewComponent } from './stats-oveview/stats-oveview.component';
@@ -25,7 +24,6 @@ import { DiffComponent } from './diff/diff.component';
     StatsGraphComponent,
     StatsDayDetailsComponent,
     HeaderComponent,
-    TestComponent,
     StatsOveviewComponent,
     LineChartComponent,
     DiffComponent

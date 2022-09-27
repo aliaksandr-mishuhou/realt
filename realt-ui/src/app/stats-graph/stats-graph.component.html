@@ -1,21 +1,22 @@
 <div class="grid-container">
+
   <div class="grid-item filter">
 
       <mat-form-field class="filter-item">
         <mat-label>Source</mat-label>
-        <mat-select [(ngModel)]="search.source">
+        <mat-select [(ngModel)]="searchParams.source">
           <mat-option value="1">Realt</mat-option>
           <mat-option value="2">Onliner</mat-option>
         </mat-select>
       </mat-form-field>
 
       <mat-form-field class="filter-item">
-        <input matInput [matDatepicker]="picker1" [(ngModel)]="search.start" placeholder="Start">
+        <input matInput [matDatepicker]="picker1" [(ngModel)]="searchParams.start" placeholder="Start">
         <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
         <mat-datepicker #picker1></mat-datepicker>
       </mat-form-field>
       <mat-form-field class="filter-item">
-        <input matInput [matDatepicker]="picker2" [(ngModel)]="search.end" placeholder="End">
+        <input matInput [matDatepicker]="picker2" [(ngModel)]="searchParams.end" placeholder="End">
         <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
         <mat-datepicker #picker2></mat-datepicker>
       </mat-form-field>
@@ -24,6 +25,11 @@
 
   </div>
 
-  <app-line-chart [data]="data" class="grid-item graph"></app-line-chart>
+  <div class="grid-item spinner" *ngIf="loading">
+    <mat-spinner mode="indeterminate" class="inner" [diameter]="50">
+    </mat-spinner>
+  </div>
+
+  <app-line-chart class="grid-item graph" [data]="data" *ngIf="!loading"></app-line-chart>
 
 </div>

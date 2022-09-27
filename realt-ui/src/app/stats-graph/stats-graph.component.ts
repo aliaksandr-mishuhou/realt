@@ -24,9 +24,11 @@ export class StatsGraphComponent implements OnInit {
   private countYearBuilder: LineChartBuilder;
   private priceYearBuilder: LineChartBuilder;
 
+  public loading : boolean = false;
+
   public data: LineChartData | undefined;
 
-  public search : Search = new Search();
+  public searchParams : Search = new Search();
 
   constructor(private statsService : StatsService, private route : ActivatedRoute) {
     // view type
@@ -45,22 +47,28 @@ export class StatsGraphComponent implements OnInit {
   }
 
   public onSearch(){
-    console.log(this.search);
+    console.log(this.searchParams);
     // TODO: use factory (id, years) => init(...)
+    this.loading = true;
     if (this.years) {
       if (this.id == "count"){
-        this.countYearBuilder.build(this.search, (data) => this.data = data);
+        this.countYearBuilder.build(this.searchParams, (data) => this.onSearchCompleted(data));
       }
       if (this.id == "price"){
-        this.priceYearBuilder.build(this.search, (data) => this.data = data);
+        this.priceYearBuilder.build(this.searchParams, (data) => this.onSearchCompleted(data));
       }
     } else {
       if (this.id == "count"){
-        this.countBuilder.build(this.search, (data) => this.data = data);
+        this.countBuilder.build(this.searchParams, (data) => this.onSearchCompleted(data));
       }
       if (this.id == "price"){
-        this.priceBuilder.build(this.search, (data) => this.data = data);
+        this.priceBuilder.build(this.searchParams, (data) => this.onSearchCompleted(data));
       }
     }
+  }
+
+  private onSearchCompleted(data: LineChartData) : void {
+    this.data = data;
+    this.loading = false;
   }
 }
