@@ -15,21 +15,26 @@ export class StatsOveviewComponent implements OnInit {
 
   private static DAYS: number = 30;
 
+  // TODO: create class
   public countRealt: LineChartData | undefined;
   public countRealtStart: number = 0;
   public countRealtEnd: number = 0;
+  public countRealtLoading: boolean = false;
 
   public countOnliner: LineChartData | undefined;
   public countOnlinerStart: number = 0;
   public countOnlinerEnd: number = 0;
+  public countOnlinerLoading: boolean = false;
 
   public priceRealt: LineChartData | undefined;
   public priceRealtStart: number = 0;
   public priceRealtEnd: number = 0;
+  public priceRealtLoading: boolean = false;
 
   public priceOnliner: LineChartData | undefined;
   public priceOnlinerStart: number = 0;
   public priceOnlinerEnd: number = 0;
+  public priceOnlinerLoading: boolean = false;
 
   private countBuilder: CountBuilder;
   private priceBuilder: PriceBuilder;
@@ -48,22 +53,31 @@ export class StatsOveviewComponent implements OnInit {
     searchRealt.source = "1";
     searchOnliner.source = "2";
 
+    this.countRealtLoading = true;
+    this.countOnlinerLoading = true;
+    this.priceRealtLoading = true;
+    this.priceOnlinerLoading = true;
+
     this.countBuilder.build(searchRealt, data => {
       this.countRealt = data;
       [this.countRealtStart, this.countRealtEnd] = this.getStartAndEnd(data);
+      this.countRealtLoading = false;
     });
     this.countBuilder.build(searchOnliner, data => {
       this.countOnliner = data;
       [this.countOnlinerStart, this.countOnlinerEnd] = this.getStartAndEnd(data);
+      this.countOnlinerLoading = false;
     });
 
     this.priceBuilder.build(searchRealt, data => {
       this.priceRealt = data;
       [this.priceRealtStart, this.priceRealtEnd] = this.getStartAndEnd(data);
+      this.priceRealtLoading = false;
     });
     this.priceBuilder.build(searchOnliner, data => {
       this.priceOnliner = data;
       [this.priceOnlinerStart, this.priceOnlinerEnd] = this.getStartAndEnd(data);
+      this.priceOnlinerLoading = false;
     });
   }
 
@@ -71,4 +85,5 @@ export class StatsOveviewComponent implements OnInit {
     const allLine = data.lines.filter(l => l.label == "All")[0];
     return [allLine.data[0], allLine.data[allLine.data.length - 1]];
   }
+
 }
